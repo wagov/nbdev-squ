@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "nbdev-squ"
+  site-url: "https://adonm.github.io/nbdev-squ"
+  description: "siem query utils nbdev edition"
+  repo-branch: main
+  repo-url: "https://github.com/adonm/nbdev-squ"
