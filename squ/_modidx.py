@@ -4,5 +4,6 @@ d = { 'settings': { 'branch': 'main',
                 'doc_baseurl': '/nbdev-squ',
                 'doc_host': 'https://adonm.github.io',
                 'git_url': 'https://github.com/adonm/nbdev-squ',
-                'lib_path': 'nbdev_squ'},
-  'syms': {'nbdev_squ.core': {'nbdev_squ.core.foo': ('core.html#foo', 'nbdev_squ/core.py')}}}
+                'lib_path': 'squ'},
+  'syms': { 'squ.api': {'squ.api.foo': ('api.html#foo', 'squ/api.py')},
+            'squ.clients': {'squ.clients.foo': ('clients.html#foo', 'squ/clients.py')}}}

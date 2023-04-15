@@ -4,6 +4,6 @@ project:
 website:
   title: "nbdev-squ"
   site-url: "https://adonm.github.io/nbdev-squ"
-  description: "siem query utils nbdev edition"
+  description: "Python SIEM Query Utils nbdev edition"
   repo-branch: main
   repo-url: "https://github.com/adonm/nbdev-squ"
