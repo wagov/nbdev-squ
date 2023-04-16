@@ -12,7 +12,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps: 
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.11' 
     - uses: fastai/workflows/quarto-ghp@master
+      with:
+        version: '3.11' 
