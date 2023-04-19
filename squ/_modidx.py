@@ -7,4 +7,8 @@ d = { 'settings': { 'branch': 'main',
                 'lib_path': 'squ'},
   'syms': { 'squ.api': {'squ.api.list_workspaces': ('api.html#list_workspaces', 'squ/api.py')},
             'squ.clients': {'squ.clients.foo': ('clients.html#foo', 'squ/clients.py')},
-            'squ.core': {'squ.core._cli': ('core.html#_cli', 'squ/core.py'), 'squ.core.login': ('core.html#login', 'squ/core.py')}}}
+            'squ.core': { 'squ.core._cli': ('core.html#_cli', 'squ/core.py'),
+                          'squ.core.azcli': ('core.html#azcli', 'squ/core.py'),
+                          'squ.core.datalake_path': ('core.html#datalake_path', 'squ/core.py'),
+                          'squ.core.load_config': ('core.html#load_config', 'squ/core.py'),
+                          'squ.core.login': ('core.html#login', 'squ/core.py')}}}
