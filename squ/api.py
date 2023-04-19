@@ -4,4 +4,28 @@
 __all__ = ['list_workspaces']
 
 # %% ../nbs/01_api.ipynb 3
-def list_workspaces(): pass
+from .core import *
+from diskcache import memoize_stampede
+import pandas
+
+# %% ../nbs/01_api.ipynb 5
+@memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
+def list_workspaces(fmt: str = "df", # df, csv, json, list
+                    agency: str = "ALL"): # Agency alias or ALL
+    path = datalake_path()
+    df = pandas.read_csv((path / "notebooks/lists/SentinelWorkspaces.csv").open())
+    df = df.join(pandas.read_csv((path / "notebooks/lists/SecOps Groups.csv").open()).set_index("Alias"), on="SecOps Group", rsuffix="_secops")
+    df = df.rename(columns={"SecOps Group": "alias", "Domains and IPs": "domains"})
+    df = df.dropna(subset=["customerId"]).sort_values(by="alias")
+    if agency != "ALL":
+        df = df[df["alias"] == agency]
+    if fmt == "df":
+        return df
+    elif fmt == "csv":
+        return df.to_csv()
+    elif fmt == "json":
+        return df.fillna("").to_dict("records")
+    elif fmt == "list":
+        return list(df["customerId"].unique())
+    else:
+        raise ValueError("Invalid format")
