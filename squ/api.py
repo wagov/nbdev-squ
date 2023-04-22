@@ -8,9 +8,11 @@ from .core import *
 from diskcache import memoize_stampede
 from concurrent.futures import ThreadPoolExecutor
 import pandas, json, logging
+
+# %% ../nbs/01_api.ipynb 4
 logger = logging.basicConfig(level=logging.INFO)
 
-# %% ../nbs/01_api.ipynb 5
+# %% ../nbs/01_api.ipynb 6
 @memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
 def list_workspaces(fmt: str = "df", # df, csv, json, list
                     agency: str = "ALL"): # Agency alias or ALL
@@ -32,7 +34,7 @@ def list_workspaces(fmt: str = "df", # df, csv, json, list
     else:
         raise ValueError("Invalid format")
 
-# %% ../nbs/01_api.ipynb 8
+# %% ../nbs/01_api.ipynb 9
 @memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
 def list_subscriptions():
     return pandas.DataFrame(azcli(["account", "list"]))["id"].unique()
