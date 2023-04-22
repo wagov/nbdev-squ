@@ -68,7 +68,7 @@ def login(refresh: bool=False # Force relogin
             cache[key] = value
 
 # %% ../nbs/00_core.ipynb 11
-@memoize_stampede(cache, expire=60)
+@memoize_stampede(cache, expire=300)
 def azcli(basecmd: list[str]):
     if not cache.get("logged_in"):
         login()
