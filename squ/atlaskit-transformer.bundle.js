@@ -37058,7 +37058,7 @@ var rl = readline.createInterface({
 });
 var input = "";
 rl.on("line", (line) => {
-  input += line;
+  input += line + "\n";
 });
 rl.on("close", () => {
   let output = transformers[args[1]].encode(transformers[args[0]].parse(input));

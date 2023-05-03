@@ -20,7 +20,7 @@ const rl = readline.createInterface({
 let input = '';
 
 rl.on('line', (line) => {
-  input += line;
+  input += line + "\n";
 });
 
 rl.on('close', () => {

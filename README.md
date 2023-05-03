@@ -11,7 +11,13 @@ pip install nbdev_squ
 
 ## How to use
 
-Fill me in please! Don’t forget code examples:
+Before using, config needs to be loaded into `squ.core.cache`, which can
+be done automatically from json in a keyvault by setting the env var
+`SQU_CONFIG` to `"keyvault/tenantid"`.
+
+``` bash
+export SQU_CONFIG="{{ keyvault }}/{{ tenantid }}"
+```
 
 ``` python
 from squ import api, clients
