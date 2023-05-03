@@ -23,18 +23,21 @@ export SQU_CONFIG="{{ keyvault }}/{{ tenantid }}"
 from squ import api, clients
 import io, pandas
 
-# Load workspace info from storage
-#df = api.list_workspaces(fmt="df")
+# Load workspace info from datalake blob storage
+df = api.list_workspaces(fmt="df"); print(df.shape)
+
+# Load workspace info from introspection of azure graph
+df = api.list_securityinsights(); print(df.shape)
 
 # Kusto query to Sentinel workspaces via Azure Lighthouse
-#df = api.query_all("kusto query | take 20", fmt="df")
+df = api.query_all("SecurityIncident | take 20", fmt="df"); print(df.shape)
 
 # Kusto query to ADX
 #df = api.adxtable2df(api.adx_query("kusto query | take 20"))
 
 # General azure cli cmd
-#api.azcli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
-#rules = api.azcli(["sentinel", "alert-rule", "list", "-g", resource_group, "-w", workspace, "--subscription", subscription])
+api.azcli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
+print(len(api.azcli(["account", "list"])))
 
 # Various pre-configured api clients
 

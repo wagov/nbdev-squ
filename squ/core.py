@@ -19,8 +19,12 @@ retryer = Retrying(wait=wait_random_exponential(), stop=stop_after_attempt(3))
 def _cli(cmd: list[str], capture_output=True):
     cmd = [sys.executable, "-m", "azure.cli"] + cmd + ["-o", "json"]
     if capture_output: # Try lots, parse output as json
-        result = retryer(subprocess.run, cmd, capture_output=capture_output, check=True)
-        return json.loads(result.stdout.decode("utf8"))
+        result = retryer(subprocess.run, cmd, capture_output=capture_output, check=True, text=True)
+        try:
+            result = json.loads(result.stdout)
+        except ValueError:
+            result = result.stdout
+        return result
     else: # Run interactively, ignore success/fail
         subprocess.run(cmd)
 
