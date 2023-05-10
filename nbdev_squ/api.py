@@ -8,12 +8,13 @@ __all__ = ['logger', 'list_workspaces', 'list_subscriptions', 'list_securityinsi
 import pandas, json, logging
 from .core import *
 from diskcache import memoize_stampede
-from concurrent.futures import ThreadPoolExecutor
 from importlib.resources import path
 from subprocess import run
+from azure.monitor.query import LogsQueryClient, LogsBatchQuery, LogsQueryStatus
+from azure.identity import AzureCliCredential
 
 # %% ../nbs/01_api.ipynb 4
-logger = logging.basicConfig(level=logging.INFO)
+logger = logging.basicConfig(level=logging.WARN)
 
 # %% ../nbs/01_api.ipynb 6
 @memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
@@ -58,29 +59,33 @@ def list_securityinsights():
         """
     ])["data"])
 
-def loganalytics_query(query: str):
+@memoize_stampede(cache, expire=60 * 5) # cache for 5 mins
+def loganalytics_query(query: str, timespan=pandas.Timedelta("14d")):
+    client = LogsQueryClient(AzureCliCredential())
+    requests = []
+    for workspace_id in list_securityinsights()["customerId"]:
+        requests.append(LogsBatchQuery(workspace_id=workspace_id, query=query, timespan=timespan))
+    results = client.query_batch(requests)
     dfs = []
-    customerids = list_securityinsights()["customerId"]
-    with ThreadPoolExecutor(max_workers=32) as executor:
-        futures = [executor.submit(azcli, [
-            "monitor", "log-analytics", "query",
-            "-w", workspace,
-            "--analytics-query", query
-        ]) for workspace in customerids]
-        for future, customerid in zip(futures, customerids):
-            try:
-                df = pandas.DataFrame(future.result())
-            except Exception as e:
-                logger.warning(e)
-                continue
-            else:
-                if "TenantId" not in df.columns:
-                    df["TenantId"] = customerid
+    for request, result in zip(requests, results):
+        if result.status == LogsQueryStatus.PARTIAL:
+            for table in result.partial_data:
+                df = pandas.DataFrame(table.rows, columns=table.columns)
+                df["TenantId"] = request.workspace
                 dfs.append(df)
+        elif result.status == LogsQueryStatus.SUCCESS:
+            table = result.tables[0]
+            df = pandas.DataFrame(table.rows, columns=table.columns)
+            df["TenantId"] = request.workspace
+            dfs.append(df)
+        else:
+            df = pandas.DataFrame([result.__dict__])
+            df["TenantId"] = request.workspace
+            dfs.append(df)
     return pandas.concat(dfs)
 
-def query_all(query: str, fmt="df"):
-    df = loganalytics_query(query)
+def query_all(query: str, fmt="df", timespan=pandas.Timedelta("14d")):
+    df = loganalytics_query(query, timespan)
     if fmt == "df":
         return df
     elif fmt == "csv":
@@ -90,6 +95,6 @@ def query_all(query: str, fmt="df"):
     else:
         raise ValueError("Invalid format")
 
-# %% ../nbs/01_api.ipynb 16
+# %% ../nbs/01_api.ipynb 13
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node", transformer=path("squ", "atlaskit-transformer.bundle.js").absolute()):
     return run([runtime, transformer, inputfmt, outputfmt], input=inputtext, text=True, capture_output=True, check=True).stdout
