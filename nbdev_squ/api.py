@@ -6,7 +6,7 @@ __all__ = ['logger', 'list_workspaces', 'list_subscriptions', 'list_securityinsi
 
 # %% ../nbs/01_api.ipynb 3
 import pandas, json, logging
-from .core import *
+from squ.core import *
 from diskcache import memoize_stampede
 from concurrent.futures import ThreadPoolExecutor
 from importlib.resources import path
@@ -90,6 +90,6 @@ def query_all(query: str, fmt="df"):
     else:
         raise ValueError("Invalid format")
 
-# %% ../nbs/01_api.ipynb 11
+# %% ../nbs/01_api.ipynb 16
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node", transformer=path("squ", "atlaskit-transformer.bundle.js").absolute()):
     return run([runtime, transformer, inputfmt, outputfmt], input=inputtext, text=True, capture_output=True, check=True).stdout
