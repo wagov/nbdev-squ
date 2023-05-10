@@ -6,7 +6,7 @@ __all__ = ['logger', 'list_workspaces', 'list_subscriptions', 'list_securityinsi
 
 # %% ../nbs/01_api.ipynb 3
 import pandas, json, logging
-from squ.core import *
+from .core import *
 from diskcache import memoize_stampede
 from concurrent.futures import ThreadPoolExecutor
 from importlib.resources import path
