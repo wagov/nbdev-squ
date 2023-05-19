@@ -1,0 +1,4 @@
+{
+    "image":"mcr.microsoft.com/devcontainers/universal:2",
+    "onCreateCommand": "bash -i install.sh"
+}

@@ -13,7 +13,7 @@ from upath import UPath
 # %% ../nbs/00_core.ipynb 5
 dirs = PlatformDirs("nbdev-squ")
 cache = Cache(dirs.user_cache_dir)
-retryer = Retrying(wait=wait_random_exponential(), stop=stop_after_attempt(3))
+retryer = Retrying(wait=wait_random_exponential(), stop=stop_after_attempt(3), reraise=True)
 
 # %% ../nbs/00_core.ipynb 6
 def _cli(cmd: list[str], capture_output=True):
@@ -83,6 +83,8 @@ def azcli(basecmd: list[str]):
 def datalake_path(expiry_days: int=3, # Number of days until the SAS token expires
                   permissions: str="racwdlt" # Permissions to grant on the SAS token
                     ):
+    if not cache.get("logged_in"):
+        login()
     expiry = pandas.Timestamp("now") + pandas.Timedelta(days=expiry_days)
     account = cache["datalake_account"].split(".")[0] # Grab the account name, not the full FQDN
     sas = azcli(["storage", "container", "generate-sas", "--auth-mode", "login", "--as-user", 
