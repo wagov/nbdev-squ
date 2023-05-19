@@ -1,6 +1,7 @@
 _docs/
 _proc/
 node_modules/
+*.bundle.js
 
 *.bak
 .gitattributes
