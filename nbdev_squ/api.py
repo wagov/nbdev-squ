@@ -111,4 +111,6 @@ def query_all(query, fmt="df", timespan=pandas.Timedelta("14d")):
 
 # %% ../nbs/01_api.ipynb 11
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node", transformer=path("nbdev_squ", "atlaskit-transformer.bundle.js").absolute()):
+    if not transformer.exists():
+        run() # get transformer from github release
     return run([runtime, transformer, inputfmt, outputfmt], input=inputtext, text=True, capture_output=True, check=True).stdout

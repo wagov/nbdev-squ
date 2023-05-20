@@ -17,13 +17,19 @@ retryer = Retrying(wait=wait_random_exponential(), stop=stop_after_attempt(3), r
 
 # %% ../nbs/00_core.ipynb 6
 def _cli(cmd: list[str], capture_output=True):
-    cmd = [sys.executable, "-m", "azure.cli"] + cmd + ["-o", "json"]
+    cmd = [sys.executable, "-m", "azure.cli"] + cmd
     if capture_output: # Try lots, parse output as json
-        result = retryer(subprocess.run, cmd, capture_output=capture_output, check=True, text=True)
+        try:
+            result = retryer(subprocess.run, cmd + ["-o", "json"], capture_output=capture_output, check=True, text=True)
+        except subprocess.CalledProcessError:
+            # Run in foreground to see error
+            subprocess.run(cmd, check=True)
+            # Clear login cache incase stale
+            cache.delete("logged_in")
         try:
             result = json.loads(result.stdout)
         except ValueError:
-            result = result.stdout
+            result = result.stdout or {}
         return result
     else: # Run interactively, ignore success/fail
         subprocess.run(cmd)
@@ -34,6 +40,7 @@ def load_config(path = None # Path to read json config into cache from
     if path:
         return json.loads(path.read_text())
     try:
+        _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
         return json.loads(_cli(["keyvault", "secret", "show", 
                                 "--vault-name", cache["vault_name"], 
                                 "--name", f"squconfig-{cache['tenant_id']}"])["value"])
@@ -63,7 +70,7 @@ def login(refresh: bool=False # Force relogin
                 tenant = cache.get("tenant_id", [])
                 if tenant:
                     tenant = ["--tenant", tenant]
-                _cli(["login", *tenant, "--use-device-code"], capture_output=False)
+                _cli(["login", *tenant, "--use-device-code", "--allow-no-subscriptions", "-o", "none"], capture_output=False)
             else:
                 cache["logged_in"] = True
                 cache["login_time"] = pandas.Timestamp("now")
@@ -72,7 +79,6 @@ def login(refresh: bool=False # Force relogin
             cache[key] = value
 
 # %% ../nbs/00_core.ipynb 11
-@memoize_stampede(cache, expire=300)
 def azcli(basecmd: list[str]):
     if not cache.get("logged_in"):
         login()
