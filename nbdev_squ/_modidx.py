@@ -2,8 +2,8 @@
 
 d = { 'settings': { 'branch': 'main',
                 'doc_baseurl': '/nbdev-squ',
-                'doc_host': 'https://adonm.github.io',
-                'git_url': 'https://github.com/adonm/nbdev-squ',
+                'doc_host': 'https://wagov.github.io',
+                'git_url': 'https://github.com/wagov/nbdev-squ',
                 'lib_path': 'nbdev_squ'},
   'syms': { 'nbdev_squ.api': { 'nbdev_squ.api.atlaskit_transformer': ('api.html#atlaskit_transformer', 'nbdev_squ/api.py'),
                                'nbdev_squ.api.chunks': ('api.html#chunks', 'nbdev_squ/api.py'),

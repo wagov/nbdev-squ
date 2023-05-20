@@ -5,18 +5,17 @@ __all__ = ['logger', 'list_workspaces', 'list_subscriptions', 'list_securityinsi
            'query_all', 'atlaskit_transformer']
 
 # %% ../nbs/01_api.ipynb 3
-import pandas, json, logging
+import pandas, json, logging, time, requests
 from .core import *
 from diskcache import memoize_stampede
-from importlib.resources import path
-from subprocess import run
+from subprocess import run, CalledProcessError
 from azure.monitor.query import LogsQueryClient, LogsBatchQuery, LogsQueryStatus
 from azure.identity import AzureCliCredential
 
-# %% ../nbs/01_api.ipynb 4
-logger = logging.basicConfig(level=logging.WARN)
+# %% ../nbs/01_api.ipynb 5
+logger = logging.getLogger(__name__)
 
-# %% ../nbs/01_api.ipynb 6
+# %% ../nbs/01_api.ipynb 7
 @memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
 def list_workspaces(fmt: str = "df", # df, csv, json, list
                     agency: str = "ALL"): # Agency alias or ALL
@@ -24,7 +23,7 @@ def list_workspaces(fmt: str = "df", # df, csv, json, list
     df = pandas.read_csv((path / "notebooks/lists/SentinelWorkspaces.csv").open())
     df = df.join(pandas.read_csv((path / "notebooks/lists/SecOps Groups.csv").open()).set_index("Alias"), on="SecOps Group", rsuffix="_secops")
     df = df.rename(columns={"SecOps Group": "alias", "Domains and IPs": "domains"})
-    df = df.dropna(subset=["customerId"]).sort_values(by="alias")
+    df = df.dropna(subset=["customerId"]).sort_values(by="alias").convert_dtypes().reset_index()
     if agency != "ALL":
         df = df[df["alias"] == agency]
     if fmt == "df":
@@ -38,7 +37,7 @@ def list_workspaces(fmt: str = "df", # df, csv, json, list
     else:
         raise ValueError("Invalid format")
 
-# %% ../nbs/01_api.ipynb 9
+# %% ../nbs/01_api.ipynb 11
 @memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
 def list_subscriptions():
     return pandas.DataFrame(azcli(["account", "list"]))["id"].unique()
@@ -65,31 +64,49 @@ def chunks(items, size):
         yield items[i:i + size]
 
 @memoize_stampede(cache, expire=60 * 5) # cache for 5 mins
-def loganalytics_query(queries: list[str], timespan=pandas.Timedelta("14d")):
+def loganalytics_query(queries: list[str], timespan=pandas.Timedelta("14d"), batch_size=200, batch_delay=35):
+    """
+    Run queries across all workspaces, in batches of `batch_size` with a minimum delay of `batch_delay` between batches.
+    Returns a dictionary of queries and results
+    """
     client = LogsQueryClient(AzureCliCredential())
+    workspaces = list_workspaces(fmt="df")
+    sentinel_workspaces = list_securityinsights()
     requests, results = [], []
     for query in queries:
-        for workspace_id in list_securityinsights()["customerId"]:
+        for workspace_id in sentinel_workspaces["customerId"]:
             requests.append(LogsBatchQuery(workspace_id=workspace_id, query=query, timespan=timespan))
     querytime = pandas.Timestamp("now")
-    for request_batch in chunks(requests, 100):
+    logger.info(f"Executing {len(requests)} queries at {querytime}")
+    for request_batch in chunks(requests, batch_size):
+        batch_start = pandas.Timestamp("now")
         results += client.query_batch(request_batch)
-    dfs = []
+        duration = pandas.Timestamp("now") - batch_start
+        logger.info(f"Completed {len(results)} in {duration}")
+        if duration.total_seconds() < batch_delay:
+            time.sleep(batch_delay - duration.total_seconds())
+    dfs = {}
     for request, result in zip(requests, results):
         if result.status == LogsQueryStatus.PARTIAL:
-            table = result.partial_data[0]
-            df = pandas.DataFrame(table.rows, columns=table.columns)
+            tables = result.partial_data
+            tables = [pandas.DataFrame(table.rows, columns=table.columns) for table in tables]
         elif result.status == LogsQueryStatus.SUCCESS:
-            table = result.tables[0]
-            df = pandas.DataFrame(table.rows, columns=table.columns)
+            tables = result.tables
+            tables = [pandas.DataFrame(table.rows, columns=table.columns) for table in tables]
         else:
-            df = pandas.DataFrame([result.__dict__])
+            tables = [pandas.DataFrame([result.__dict__])]
+        df = pandas.concat(tables).dropna(axis=1, how='all') # prune empty columns
         df["TenantId"] = request.workspace
-        df["_query"] = query
-        df["_timespan"] = timespan
-        df["_querytime"] = querytime
-        dfs.append(df)
-    return pandas.concat(dfs)
+        alias = workspaces.query(f'customerId == "{request.workspace}"')["alias"].str.cat()
+        if alias == '':
+            alias = sentinel_workspaces.query(f'customerId == "{request.workspace}"')["name"].str.cat()
+        df["_alias"] = alias
+        query = request.body["query"]
+        if query in dfs:
+            dfs[query].append(df)
+        else:
+            dfs[query] = [df]
+    return {query: pandas.concat(results, ignore_index=True).convert_dtypes() for query, results in dfs.items()}
 
 def query_all(query, fmt="df", timespan=pandas.Timedelta("14d")):
     try:
@@ -99,7 +116,7 @@ def query_all(query, fmt="df", timespan=pandas.Timedelta("14d")):
     except (AssertionError, TypeError):
         # if it is a plain string or it's not iterable, convert into a list of queries
         query = [query]
-    df = loganalytics_query(query, timespan)
+    df = pandas.concat(loganalytics_query(query, timespan).values())
     if fmt == "df":
         return df
     elif fmt == "csv":
@@ -109,8 +126,16 @@ def query_all(query, fmt="df", timespan=pandas.Timedelta("14d")):
     else:
         raise ValueError("Invalid format")
 
-# %% ../nbs/01_api.ipynb 11
-def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node", transformer=path("nbdev_squ", "atlaskit-transformer.bundle.js").absolute()):
+# %% ../nbs/01_api.ipynb 13
+def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node"):
+    transformer = dirs.user_cache_path / "atlaskit-transformer.bundle.js"
     if not transformer.exists():
-        run() # get transformer from github release
-    return run([runtime, transformer, inputfmt, outputfmt], input=inputtext, text=True, capture_output=True, check=True).stdout
+        import nbdev_squ
+        transformer_url = f'{nbdev_squ._modidx.d["settings"]["git_url"]}/releases/download/v{nbdev_squ.__version__}/atlaskit-transformer.bundle.js'
+        transformer.write_bytes(requests.get(transformer_url).content)
+    cmd = [runtime, str(transformer), inputfmt, outputfmt]
+    logger.debug(" ".join(cmd))
+    try:
+        return run(cmd, input=inputtext, text=True, capture_output=True, check=True).stdout
+    except CalledProcessError:
+        run(cmd, input=inputtext, text=True, check=True)
