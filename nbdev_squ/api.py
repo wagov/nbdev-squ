@@ -128,9 +128,9 @@ def query_all(query, fmt="df", timespan=pandas.Timedelta("14d")):
 
 # %% ../nbs/01_api.ipynb 13
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node"):
-    transformer = dirs.user_cache_path / "atlaskit-transformer.bundle.js"
+    import nbdev_squ
+    transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{nbdev_squ.__version__}.js"
     if not transformer.exists():
-        import nbdev_squ
         transformer_url = f'{nbdev_squ._modidx.d["settings"]["git_url"]}/releases/download/v{nbdev_squ.__version__}/atlaskit-transformer.bundle.js'
         transformer.write_bytes(requests.get(transformer_url).content)
     cmd = [runtime, str(transformer), inputfmt, outputfmt]

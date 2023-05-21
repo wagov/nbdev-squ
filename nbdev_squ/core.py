@@ -60,8 +60,7 @@ def login(refresh: bool=False # Force relogin
             cache["msi_failed"] = True
         else:
             cache.delete("msi_failed")
-            cache["logged_in"] = True
-            cache["login_time"] = pandas.Timestamp("now")
+            cache.set("logged_in", True, 60 * 60 * 3) # cache login state for 3 hrs
     if not os.environ.get("IDENTITY_HEADER") or cache.get("msi_failed"):
         while not cache.get("logged_in"):
             try:
@@ -72,11 +71,10 @@ def login(refresh: bool=False # Force relogin
                     tenant = ["--tenant", tenant]
                 _cli(["login", *tenant, "--use-device-code", "--allow-no-subscriptions", "-o", "none"], capture_output=False)
             else:
-                cache["logged_in"] = True
-                cache["login_time"] = pandas.Timestamp("now")
+                cache.set("logged_in", True, 60 * 60 * 3) # cache login state for 3 hrs
     if cache.get("vault_name"):
         for key, value in load_config().items():
-            cache[key] = value
+            cache[key] = value # Config lasts forever, don't expire
 
 # %% ../nbs/00_core.ipynb 11
 def azcli(basecmd: list[str]):
