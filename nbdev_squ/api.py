@@ -165,7 +165,8 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
             queries.append(query)
     for timespan in timespans:
         results = pandas.concat(loganalytics_query(queries, pandas.Timedelta(timespan), sentinel_workspaces = workspaces).values())
-        results = results.drop('column_name', axis=1)
+        if 'placeholder_' in results.columns:
+            results = results.drop('placeholder_', axis=1)
         if results.empty:
             logger.info(f"No results in {timespan}, extending hunt")
             continue
