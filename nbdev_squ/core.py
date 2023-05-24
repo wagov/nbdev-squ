@@ -33,7 +33,8 @@ def _cli(cmd: list[str], capture_output=True):
         try:
             result = benedict(result.stdout, format="json")
         except ValueError: # handle if output not json
-            result = result.stdout.strip() or benedict()
+            logger.info("Falling back to plain cli output")
+            result = result.stdout.strip().strip('"') or benedict()
         return result
     else: # Run interactively, ignore success/fail
         subprocess.run(cmd)
@@ -61,7 +62,11 @@ def login(refresh: bool=False # Force relogin
     tenant = cache.get("tenant_id")
     try:
         _cli(["account", "show"])
-    except subprocess.CalledProcessError:
+        if tenant:
+            tenant_visible = len(_cli(["account", "list"]).search(tenant)) > 0
+            assert tenant_visible > 0
+        cache.set("logged_in", True, 60 * 60 * 3) # cache login state for 3 hrs
+    except:
         cache.delete("logged_in")
     while not cache.get("logged_in"):
         logger.info("Cache doesn't look logged in, attempting login")
@@ -69,9 +74,9 @@ def login(refresh: bool=False # Force relogin
             # See if we can login with a managed identity in under 5 secs and see the configured tenant
             subprocess.run(["timeout", "5", sys.executable, "-m", "azure.cli", "login", "--identity", "-o", "none", "--allow-no-subscriptions"], check=True)
             if tenant:
-                tenant_visible = len(_cli(["account", "list"]).search(tenant + 'as')) > 0
+                tenant_visible = len(_cli(["account", "list"]).search(tenant)) > 0
                 assert tenant_visible > 0
-        except subprocess.CalledProcessError:
+        except:
             # If managed identity unavailable, fall back on a manual login
             if tenant:
                 tenant_scope = ["--tenant", tenant]
@@ -95,8 +100,8 @@ def azcli(basecmd: list[str]):
         login()
     return _cli(basecmd)
 
-# %% ../nbs/00_core.ipynb 15
-#@memoize_stampede(cache, expire=60 * 60 * 24)
+# %% ../nbs/00_core.ipynb 16
+@memoize_stampede(cache, expire=60 * 60 * 24)
 def datalake_path(expiry_days: int=3, # Number of days until the SAS token expires
                   permissions: str="racwdlt" # Permissions to grant on the SAS token
                     ):
@@ -105,8 +110,6 @@ def datalake_path(expiry_days: int=3, # Number of days until the SAS token expir
     expiry = pandas.Timestamp("now") + pandas.Timedelta(days=expiry_days)
     account = cache["config"]["datalake_account"].split(".")[0] # Grab the account name, not the full FQDN
     container = cache['config']['datalake_container']
-    print(locals())
-    sas = azcli(["storage", "container", "generate-sas", "--auth-mode", "login", "--as-user", 
+    sas = azcli(["storage", "container", "generate-sas", "--auth-mode", "login", "--as-user",
                  "--account-name", account, "--name", container, "--permissions", permissions, "--expiry", str(expiry.date())])
-    print(sas)
     return UPath(f"az://{container}", account_name=account, sas_token=sas)
