@@ -161,10 +161,11 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
             querylogged = True
         for chunk in chunks([f"{column} {expression} {indicator}" for column in columns], 20):
             query = " or ".join(chunk)
-            query = f"find where {query} | take {take} | project pack_=pack_all() | evaluate bag_unpack(pack_)"
+            query = f"find where {query} | take {take} | extend placeholder_=dynamic({{'':null}}) | evaluate bag_unpack(column_ifexists('pack_', placeholder_))"
             queries.append(query)
     for timespan in timespans:
         results = pandas.concat(loganalytics_query(queries, pandas.Timedelta(timespan), sentinel_workspaces = workspaces).values())
+        results = results.drop('column_name', axis=1)
         if results.empty:
             logger.info(f"No results in {timespan}, extending hunt")
             continue
