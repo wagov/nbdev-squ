@@ -4,11 +4,12 @@
 __all__ = ['logger', 'dirs', 'cache', 'retryer', 'load_config', 'login', 'azcli', 'datalake_path']
 
 # %% ../nbs/00_core.ipynb 3
-import json, logging, subprocess, os, sys, pandas
+import logging, subprocess, os, sys, pandas
 from platformdirs import PlatformDirs
 from diskcache import Cache, memoize_stampede
 from tenacity import wait_random_exponential, stop_after_attempt, Retrying
 from upath import UPath
+from benedict import benedict
 
 # %% ../nbs/00_core.ipynb 5
 logger = logging.getLogger(__name__)
@@ -30,9 +31,9 @@ def _cli(cmd: list[str], capture_output=True):
             # Run in foreground to see error
             subprocess.run(cmd, check=True)
         try:
-            result = json.loads(result.stdout)
-        except ValueError:
-            result = result.stdout or {}
+            result = benedict(result.stdout, format="json")
+        except ValueError: # handle if output not json
+            result = result.stdout.strip() or benedict()
         return result
     else: # Run interactively, ignore success/fail
         subprocess.run(cmd)
@@ -40,47 +41,53 @@ def _cli(cmd: list[str], capture_output=True):
 # %% ../nbs/00_core.ipynb 10
 def load_config(path = None # Path to read json config into cache from
                ):
+    config = benedict()
     if path:
-        return json.loads(path.read_text())
+        config = benedict(path.read_text(), format="json")
     try:
         _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
-        return json.loads(_cli(["keyvault", "secret", "show", 
+        config = benedict(_cli(["keyvault", "secret", "show", 
                                 "--vault-name", cache["vault_name"], 
-                                "--name", f"squconfig-{cache['tenant_id']}"])["value"])
+                                "--name", f"squconfig-{cache['tenant_id']}"]).value, format="json")
     except subprocess.CalledProcessError:
-        return {}
+        cache.delete("logged_in") # clear the logged in state
+    config.standardize()
+    return config
 
 def login(refresh: bool=False # Force relogin
          ):
     if "/" in os.environ.get("SQU_CONFIG", ""):
         cache["vault_name"], cache["tenant_id"] = os.environ["SQU_CONFIG"].split("/")
-    if os.environ.get("IDENTITY_HEADER") and not cache.get("msi_failed"):
-        if refresh: # Forced logout only makes sense for managed service identity (msi) signins
-            _cli(["logout"])
+    tenant = cache.get("tenant_id")
+    try:
+        _cli(["account", "show"])
+    except subprocess.CalledProcessError:
+        cache.delete("logged_in")
+    while not cache.get("logged_in"):
+        logger.info("Cache doesn't look logged in, attempting login")
         try:
-            _cli(["login", "--identity"])
+            # See if we can login with a managed identity in under 5 secs and see the configured tenant
+            subprocess.run(["timeout", "5", sys.executable, "-m", "azure.cli", "login", "--identity", "-o", "none", "--allow-no-subscriptions"], check=True)
+            if tenant:
+                tenant_visible = len(_cli(["account", "list"]).search(tenant + 'as')) > 0
+                assert tenant_visible > 0
         except subprocess.CalledProcessError:
-            cache["msi_failed"] = True
-        else:
-            cache.delete("msi_failed")
-            cache.set("logged_in", True, 60 * 60 * 3) # cache login state for 3 hrs
-    if not os.environ.get("IDENTITY_HEADER") or cache.get("msi_failed"):
-        while not cache.get("logged_in"):
-            logger.info("Cache doesn't look logged in, attempting login")
-            try:
-                _cli(["account", "show"])
-            except subprocess.CalledProcessError:
-                tenant = cache.get("tenant_id", [])
-                if tenant:
-                    tenant = ["--tenant", tenant]
-                _cli(["login", *tenant, "--use-device-code", "--allow-no-subscriptions", "-o", "none"], capture_output=False)
+            # If managed identity unavailable, fall back on a manual login
+            if tenant:
+                tenant_scope = ["--tenant", tenant]
             else:
-                cache.set("logged_in", True, 60 * 60 * 3) # cache login state for 3 hrs
+                tenant_scope = []
+            _cli(["login", *tenant_scope, "--use-device-code", "--allow-no-subscriptions", "-o", "none"], capture_output=False)
+        # Finally, validate the login once more, and set the login state
+        try:
+            _cli(["account", "show"])
+            cache.set("logged_in", True, 60 * 60 * 3) # cache login state for 3 hrs
+        except subprocess.CalledProcessError:
+            cache.delete("logged_in")
     logger.info("Cache state is logged in")
-    if cache.get("vault_name"):
+    if cache.get("vault_name"): # Always reload config on any login call
         logger.info("Loading config from keyvault")
-        for key, value in load_config().items():
-            cache[key] = value # Config lasts forever, don't expire
+        cache["config"] = load_config() # Config lasts forever, don't expire
 
 # %% ../nbs/00_core.ipynb 13
 def azcli(basecmd: list[str]):
@@ -89,14 +96,17 @@ def azcli(basecmd: list[str]):
     return _cli(basecmd)
 
 # %% ../nbs/00_core.ipynb 15
-@memoize_stampede(cache, expire=60 * 60 * 24)
+#@memoize_stampede(cache, expire=60 * 60 * 24)
 def datalake_path(expiry_days: int=3, # Number of days until the SAS token expires
                   permissions: str="racwdlt" # Permissions to grant on the SAS token
                     ):
-    if not cache.get("logged_in"):
+    if not cache.get("logged_in"): # Have to login to grab keyvault config
         login()
     expiry = pandas.Timestamp("now") + pandas.Timedelta(days=expiry_days)
-    account = cache["datalake_account"].split(".")[0] # Grab the account name, not the full FQDN
+    account = cache["config"]["datalake_account"].split(".")[0] # Grab the account name, not the full FQDN
+    container = cache['config']['datalake_container']
+    print(locals())
     sas = azcli(["storage", "container", "generate-sas", "--auth-mode", "login", "--as-user", 
-                 "--account-name", account, "--name", cache["datalake_container"], "--permissions", permissions, "--expiry", str(expiry.date())])
-    return UPath(f"az://{cache['datalake_container']}", account_name=account, sas_token=sas)
+                 "--account-name", account, "--name", container, "--permissions", permissions, "--expiry", str(expiry.date())])
+    print(sas)
+    return UPath(f"az://{container}", account_name=account, sas_token=sas)
