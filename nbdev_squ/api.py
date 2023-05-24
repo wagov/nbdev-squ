@@ -152,11 +152,13 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
     else:
         df = list_securityinsights()
         workspaces = df[df["customerId"].isin(workspaces)]
-    logger.info(f"Basic query structure for testing: find where {columns[0]} {expression} '{indicators[0]}' | take {take} | evaluate bag_unpack(pack_)")
+    logger.info(f"Basic query structure for testing: find where {columns[0]} {expression} '{indicators[0]}' | take {take}")
     for indicator in indicators:
-        for chunk in chunks([f"{column} {expression} '{indicator}'" for column in columns], 20):
+        if expression not in ['has_all']:
+            indicator = f"'{indicator}'" # wrap indicator in quotes unless expecting dynamic
+        for chunk in chunks([f"{column} {expression} {indicator}" for column in columns], 20):
             query = " or ".join(chunk)
-            query = f"find where {query} | take {take} | evaluate bag_unpack(pack_)"
+            query = f"find where {query} | take {take} | project pack_=pack_all() | evaluate bag_unpack(pack_)"
             queries.append(query)
     for timespan in timespans:
         results = pandas.concat(loganalytics_query(queries, pandas.Timedelta(timespan), sentinel_workspaces = workspaces).values())
@@ -165,6 +167,8 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
             continue
         logger.info(f"Found {indicators} in {timespan}, returning")
         return results
+    else:
+        raise Exception("No results found!")
 
 # %% ../nbs/01_api.ipynb 16
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node"):
