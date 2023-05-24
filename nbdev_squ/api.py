@@ -152,10 +152,13 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
     else:
         df = list_securityinsights()
         workspaces = df[df["customerId"].isin(workspaces)]
-    logger.info(f"Basic query structure for testing: find where {columns[0]} {expression} '{indicators[0]}' | take {take}")
+    querylogged = False
     for indicator in indicators:
         if expression not in ['has_all']:
             indicator = f"'{indicator}'" # wrap indicator in quotes unless expecting dynamic
+        if not querylogged:
+            logger.info(f"Test Query: find where {columns[0]} {expression} '{indicators[0]}' | take {take}")
+            querylogged=True
         for chunk in chunks([f"{column} {expression} {indicator}" for column in columns], 20):
             query = " or ".join(chunk)
             query = f"find where {query} | take {take} | project pack_=pack_all() | evaluate bag_unpack(pack_)"
