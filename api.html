@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>nbdev-squ - api</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="nbdev-squ - api">
+<meta property="og:description" content="">
+<meta property="og:site-name" content="nbdev-squ">
+<meta name="twitter:title" content="nbdev-squ - api">
+<meta name="twitter:description" content="">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">nbdev-squ</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./api.html">api</a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SIEM Query Utils</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">core</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">api</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./clients.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">clients</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#list-workspaces" id="toc-list-workspaces" class="nav-link active" data-scroll-target="#list-workspaces">List Workspaces</a>
+  <ul class="collapse">
+  <li><a href="#list_workspaces" id="toc-list_workspaces" class="nav-link" data-scroll-target="#list_workspaces">list_workspaces</a></li>
+  </ul></li>
+  <li><a href="#log-analytics-query" id="toc-log-analytics-query" class="nav-link" data-scroll-target="#log-analytics-query">Log Analytics Query</a>
+  <ul class="collapse">
+  <li><a href="#query_all" id="toc-query_all" class="nav-link" data-scroll-target="#query_all">query_all</a></li>
+  <li><a href="#loganalytics_query" id="toc-loganalytics_query" class="nav-link" data-scroll-target="#loganalytics_query">loganalytics_query</a></li>
+  <li><a href="#chunks" id="toc-chunks" class="nav-link" data-scroll-target="#chunks">chunks</a></li>
+  <li><a href="#list_securityinsights" id="toc-list_securityinsights" class="nav-link" data-scroll-target="#list_securityinsights">list_securityinsights</a></li>
+  <li><a href="#list_subscriptions" id="toc-list_subscriptions" class="nav-link" data-scroll-target="#list_subscriptions">list_subscriptions</a></li>
+  <li><a href="#threat-hunting-helper" id="toc-threat-hunting-helper" class="nav-link" data-scroll-target="#threat-hunting-helper">Threat hunting helper</a>
+  <ul class="collapse">
+  <li><a href="#hunt" id="toc-hunt" class="nav-link" data-scroll-target="#hunt">hunt</a></li>
+  <li><a href="#atlaskit_transformer" id="toc-atlaskit_transformer" class="nav-link" data-scroll-target="#atlaskit_transformer">atlaskit_transformer</a></li>
+  </ul></li>
+  <li><a href="#sentinel-incident-sync-helpers" id="toc-sentinel-incident-sync-helpers" class="nav-link" data-scroll-target="#sentinel-incident-sync-helpers">Sentinel Incident sync helpers</a>
+  <ul class="collapse">
+  <li><a href="#security_alerts" id="toc-security_alerts" class="nav-link" data-scroll-target="#security_alerts">security_alerts</a></li>
+  <li><a href="#security_incidents" id="toc-security_incidents" class="nav-link" data-scroll-target="#security_incidents">security_incidents</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/wagov/nbdev-squ/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">api</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>logging.basicConfig(level<span class="op">=</span>logging.INFO)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="list-workspaces" class="level2">
+<h2 class="anchored" data-anchor-id="list-workspaces">List Workspaces</h2>
+<p>The <a href="https://wagov.github.io/nbdev-squ/api.html#list_workspaces"><code>list_workspaces</code></a> function retreives a list of workspaces from blob storage and returns it in various formats</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@memoize_stampede</span>(cache, expire<span class="op">=</span><span class="dv">60</span> <span class="op">*</span> <span class="dv">60</span> <span class="op">*</span> <span class="dv">3</span>) <span class="co"># cache for 3 hours</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_workspaces(fmt: <span class="bu">str</span> <span class="op">=</span> <span class="st">"df"</span>, <span class="co"># df, csv, json, list</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                    agency: <span class="bu">str</span> <span class="op">=</span> <span class="st">"ALL"</span>): <span class="co"># Agency alias or ALL</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    path <span class="op">=</span> datalake_path()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pandas.read_csv((path <span class="op">/</span> <span class="st">"notebooks/lists/SentinelWorkspaces.csv"</span>).<span class="bu">open</span>())</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.join(pandas.read_csv((path <span class="op">/</span> <span class="st">"notebooks/lists/SecOps Groups.csv"</span>).<span class="bu">open</span>()).set_index(<span class="st">"Alias"</span>), on<span class="op">=</span><span class="st">"SecOps Group"</span>, rsuffix<span class="op">=</span><span class="st">"_secops"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.rename(columns<span class="op">=</span>{<span class="st">"SecOps Group"</span>: <span class="st">"alias"</span>, <span class="st">"Domains and IPs"</span>: <span class="st">"domains"</span>})</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> df.dropna(subset<span class="op">=</span>[<span class="st">"customerId"</span>]).sort_values(by<span class="op">=</span><span class="st">"alias"</span>).convert_dtypes().reset_index()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> agency <span class="op">!=</span> <span class="st">"ALL"</span>:</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> df[df[<span class="st">"alias"</span>] <span class="op">==</span> agency]</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> fmt <span class="op">==</span> <span class="st">"df"</span>:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> fmt <span class="op">==</span> <span class="st">"csv"</span>:</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.to_csv()</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> fmt <span class="op">==</span> <span class="st">"json"</span>:</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.fillna(<span class="st">""</span>).to_dict(<span class="st">"records"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> fmt <span class="op">==</span> <span class="st">"list"</span>:</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">list</span>(df[<span class="st">"customerId"</span>].unique())</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Invalid format"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L21" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="list_workspaces" class="level3">
+<h3 class="anchored" data-anchor-id="list_workspaces">list_workspaces</h3>
+<blockquote class="blockquote">
+<pre><code> list_workspaces (fmt:str='df', agency:str='ALL')</code></pre>
+</blockquote>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>fmt</td>
+<td>str</td>
+<td>df</td>
+<td>df, csv, json, list</td>
+</tr>
+<tr class="even">
+<td>agency</td>
+<td>str</td>
+<td>ALL</td>
+<td>Agency alias or ALL</td>
+</tr>
+</tbody>
+</table>
+<p>You can use it do lookup an agencies alias based on its <code>customerId</code> (also known as <code>TenantId</code>, Log Analytics <code>WorkspaceId</code>)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>workspaces <span class="op">=</span> list_workspaces()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>workspaces.query(<span class="ss">f'customerId == "</span><span class="sc">{</span>workspaces[<span class="st">"customerId"</span>][<span class="dv">0</span>]<span class="sc">}</span><span class="ss">"'</span>)[<span class="st">"alias"</span>].<span class="bu">str</span>.cat()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="log-analytics-query" class="level1">
+<h1>Log Analytics Query</h1>
+<p>The below function makes it easy to query all workspaces with sentinel installed using log analytics.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@memoize_stampede</span>(cache, expire<span class="op">=</span><span class="dv">60</span> <span class="op">*</span> <span class="dv">60</span> <span class="op">*</span> <span class="dv">3</span>) <span class="co"># cache for 3 hours</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_subscriptions():</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pandas.DataFrame(azcli([<span class="st">"account"</span>, <span class="st">"list"</span>]))[<span class="st">"id"</span>].unique()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="at">@memoize_stampede</span>(cache, expire<span class="op">=</span><span class="dv">60</span> <span class="op">*</span> <span class="dv">60</span> <span class="op">*</span> <span class="dv">3</span>) <span class="co"># cache for 3 hours</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> list_securityinsights():</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pandas.DataFrame(azcli([</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"graph"</span>, <span class="st">"query"</span>, <span class="st">"--first"</span>, <span class="st">"1000"</span>, <span class="st">"-q"</span>, </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"""</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="st">        resources</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="st">        | where type =~ 'microsoft.operationsmanagement/solutions'</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="st">        | where name startswith 'SecurityInsights'</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="st">        | project wlid = tolower(tostring(properties.workspaceResourceId))</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="st">        | join kind=leftouter (</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="st">            resources | where type =~ 'microsoft.operationalinsights/workspaces' | extend wlid = tolower(id))</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="st">            on wlid</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="st">        | extend customerId = properties.customerId</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="st">        """</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    ])[<span class="st">"data"</span>])</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> chunks(items, size):</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Yield successive `size` chunks from `items`</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(items), size):</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span> items[i:i <span class="op">+</span> size]</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="at">@memoize_stampede</span>(cache, expire<span class="op">=</span><span class="dv">60</span> <span class="op">*</span> <span class="dv">5</span>) <span class="co"># cache for 5 mins</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> loganalytics_query(queries: <span class="bu">list</span>[<span class="bu">str</span>], timespan<span class="op">=</span>pandas.Timedelta(<span class="st">"14d"</span>), batch_size<span class="op">=</span><span class="dv">190</span>, batch_delay<span class="op">=</span><span class="dv">32</span>, sentinel_workspaces <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="co">    Run queries across all workspaces, in batches of `batch_size` with a minimum delay of `batch_delay` between batches.</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns a dictionary of queries and results</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> LogsQueryClient(AzureCliCredential())</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    workspaces <span class="op">=</span> list_workspaces(fmt<span class="op">=</span><span class="st">"df"</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> sentinel_workspaces <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        sentinel_workspaces <span class="op">=</span> list_securityinsights()</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    requests, results <span class="op">=</span> [], []</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> query <span class="kw">in</span> queries:</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> workspace_id <span class="kw">in</span> sentinel_workspaces[<span class="st">"customerId"</span>]:</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>            requests.append(LogsBatchQuery(workspace_id<span class="op">=</span>workspace_id, query<span class="op">=</span>query, timespan<span class="op">=</span>timespan))</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>    querytime <span class="op">=</span> pandas.Timestamp(<span class="st">"now"</span>)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="ss">f"Executing </span><span class="sc">{</span><span class="bu">len</span>(requests)<span class="sc">}</span><span class="ss"> queries at </span><span class="sc">{</span>querytime<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> request_batch <span class="kw">in</span> chunks(requests, batch_size):</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> cache.get(<span class="st">"loganalytics_query_running"</span>):</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>            time.sleep(<span class="dv">1</span>)</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>        batch_start <span class="op">=</span> pandas.Timestamp(<span class="st">"now"</span>)</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>        cache.<span class="bu">set</span>(<span class="st">"loganalytics_query_running"</span>, <span class="va">True</span>, batch_delay)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>        results <span class="op">+=</span> client.query_batch(request_batch)</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>        duration <span class="op">=</span> pandas.Timestamp(<span class="st">"now"</span>) <span class="op">-</span> batch_start</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        logger.info(<span class="ss">f"Completed </span><span class="sc">{</span><span class="bu">len</span>(results)<span class="sc">}</span><span class="ss"> (+</span><span class="sc">{</span><span class="bu">len</span>(request_batch)<span class="sc">}</span><span class="ss">) in </span><span class="sc">{</span>duration<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    dfs <span class="op">=</span> {}</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> request, result <span class="kw">in</span> <span class="bu">zip</span>(requests, results):</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> result.status <span class="op">==</span> LogsQueryStatus.PARTIAL:</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>            tables <span class="op">=</span> result.partial_data</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>            tables <span class="op">=</span> [pandas.DataFrame(table.rows, columns<span class="op">=</span>table.columns) <span class="cf">for</span> table <span class="kw">in</span> tables]</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> result.status <span class="op">==</span> LogsQueryStatus.SUCCESS:</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>            tables <span class="op">=</span> result.tables</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>            tables <span class="op">=</span> [pandas.DataFrame(table.rows, columns<span class="op">=</span>table.columns) <span class="cf">for</span> table <span class="kw">in</span> tables]</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>            tables <span class="op">=</span> [pandas.DataFrame([result.__dict__])]</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> pandas.concat(tables).dropna(axis<span class="op">=</span><span class="dv">1</span>, how<span class="op">=</span><span class="st">'all'</span>) <span class="co"># prune empty columns</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>        df[<span class="st">"TenantId"</span>] <span class="op">=</span> request.workspace</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>        alias <span class="op">=</span> workspaces.query(<span class="ss">f'customerId == "</span><span class="sc">{</span>request<span class="sc">.</span>workspace<span class="sc">}</span><span class="ss">"'</span>)[<span class="st">"alias"</span>].<span class="bu">str</span>.cat()</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> alias <span class="op">==</span> <span class="st">''</span>:</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>            alias <span class="op">=</span> sentinel_workspaces.query(<span class="ss">f'customerId == "</span><span class="sc">{</span>request<span class="sc">.</span>workspace<span class="sc">}</span><span class="ss">"'</span>)[<span class="st">"name"</span>].<span class="bu">str</span>.cat()</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>        df[<span class="st">"_alias"</span>] <span class="op">=</span> alias</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        query <span class="op">=</span> request.body[<span class="st">"query"</span>]</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> query <span class="kw">in</span> dfs:</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>            dfs[query].append(df)</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>            dfs[query] <span class="op">=</span> [df]</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {query: pandas.concat(results, ignore_index<span class="op">=</span><span class="va">True</span>).convert_dtypes() <span class="cf">for</span> query, results <span class="kw">in</span> dfs.items()}</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> query_all(query, fmt<span class="op">=</span><span class="st">"df"</span>, timespan<span class="op">=</span>pandas.Timedelta(<span class="st">"14d"</span>)):</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Check query is not a plain string and is iterable</span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> <span class="kw">not</span> <span class="bu">isinstance</span>(query, <span class="bu">str</span>)</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>        <span class="bu">iter</span>(query)</span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> (<span class="pp">AssertionError</span>, <span class="pp">TypeError</span>):</span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>        <span class="co"># if it is a plain string or it's not iterable, convert into a list of queries</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a>        query <span class="op">=</span> [query]</span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pandas.concat(loganalytics_query(query, timespan).values())</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> fmt <span class="op">==</span> <span class="st">"df"</span>:</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df</span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> fmt <span class="op">==</span> <span class="st">"csv"</span>:</span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.to_csv()</span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> fmt <span class="op">==</span> <span class="st">"json"</span>:</span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.fillna(<span class="st">""</span>).to_dict(<span class="st">"records"</span>)</span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Invalid format"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L114" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="query_all" class="level3">
+<h3 class="anchored" data-anchor-id="query_all">query_all</h3>
+<blockquote class="blockquote">
+<pre><code> query_all (query, fmt='df', timespan=Timedelta('14 days 00:00:00'))</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L68" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="loganalytics_query" class="level3">
+<h3 class="anchored" data-anchor-id="loganalytics_query">loganalytics_query</h3>
+<blockquote class="blockquote">
+<pre><code> loganalytics_query (queries:list[str], timespan=Timedelta('14 days
+                     00:00:00'), batch_size=190, batch_delay=32,
+                     sentinel_workspaces=None)</code></pre>
+</blockquote>
+<p>Run queries across all workspaces, in batches of <code>batch_size</code> with a minimum delay of <code>batch_delay</code> between batches. Returns a dictionary of queries and results</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>queries</td>
+<td>list</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>timespan</td>
+<td>Timedelta</td>
+<td>14 days 00:00:00</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>batch_size</td>
+<td>int</td>
+<td>190</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>batch_delay</td>
+<td>int</td>
+<td>32</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>sentinel_workspaces</td>
+<td>NoneType</td>
+<td>None</td>
+<td>cache for 5 mins</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L62" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="chunks" class="level3">
+<h3 class="anchored" data-anchor-id="chunks">chunks</h3>
+<blockquote class="blockquote">
+<pre><code> chunks (items, size)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L47" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="list_securityinsights" class="level3">
+<h3 class="anchored" data-anchor-id="list_securityinsights">list_securityinsights</h3>
+<blockquote class="blockquote">
+<pre><code> list_securityinsights ()</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L43" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="list_subscriptions" class="level3">
+<h3 class="anchored" data-anchor-id="list_subscriptions">list_subscriptions</h3>
+<blockquote class="blockquote">
+<pre><code> list_subscriptions ()</code></pre>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>query_all([<span class="st">"SecurityAlert"</span>]).groupby(<span class="st">"_alias"</span>)[[<span class="st">"Tactics"</span>, <span class="st">"TenantId"</span>]].nunique().sort_values(by<span class="op">=</span><span class="st">"Tactics"</span>, ascending<span class="op">=</span><span class="va">False</span>).head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="threat-hunting-helper" class="level2">
+<h2 class="anchored" data-anchor-id="threat-hunting-helper">Threat hunting helper</h2>
+<p>Scan across all databases and tables for columns with a given predicate</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>columns_of_interest <span class="op">=</span> benedict({</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"name"</span>: [<span class="st">'AADEmail'</span>, <span class="st">'AccountName'</span>, <span class="st">'AccountUPN'</span>, <span class="st">'AccountUpn'</span>, <span class="st">'Account'</span>, <span class="st">'CompromisedEntity'</span>, <span class="st">'DestinationUserName'</span>, </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Computer"</span>, <span class="st">"DisplayName"</span>, <span class="st">"EmailSenderAddress"</span>, <span class="st">"FileName"</span>, <span class="st">'FilePath'</span>, <span class="st">"FolderPath"</span>, <span class="st">'FullyQualifiedSubjectUserName'</span>, <span class="st">'InitiatingProcessAccountUpn'</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">'MailboxOwnerUPN'</span>, <span class="st">'Name'</span>, <span class="st">'NewProcessName'</span>, <span class="st">'Owner'</span>, <span class="st">'ParentProcessName'</span>, <span class="st">'Process'</span>, <span class="st">'CommandLine'</span>, <span class="st">'ProcessCommandLine'</span>, <span class="st">'RecipientEmailAddress'</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">'RequesterUpn'</span>, <span class="st">'SenderMailFromAddress'</span>, <span class="st">'SourceIdentity'</span>, <span class="st">'SourceUserName'</span>, <span class="st">'SubjectUserName'</span>, <span class="st">'TargetUserName'</span>, <span class="st">'TargetUser'</span>, <span class="st">'Upn'</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">'UserName'</span>, <span class="st">'userName'</span>, <span class="st">'UserPrincipalName'</span>],</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guid"</span>: [<span class="st">'Caller'</span>, <span class="st">"DestinationUserID"</span>, <span class="st">'SourceUserID'</span>, <span class="st">'UserId'</span>],</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ip"</span>: [<span class="st">'CallerIpAddress'</span>, <span class="st">'DestinationIP'</span>, <span class="st">'DstIpAddr'</span>, <span class="st">'EmailSourceIpAddress'</span>, <span class="st">'IPAddresses'</span>, <span class="st">'IPAddress'</span>, <span class="st">'IpAddress'</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>           <span class="st">'NetworkDestinationIP'</span>, <span class="st">'NetworkIP'</span>, <span class="st">'NetworkSourceIP'</span>, <span class="st">'RemoteIP'</span>, <span class="st">'SourceIP'</span>, <span class="st">'SrcIpAddr'</span>],</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"url"</span>: [<span class="st">"DomainName"</span>, <span class="st">'FileOriginUrl'</span>, <span class="st">'FQDN'</span>, <span class="st">'RemoteUrl'</span>, <span class="st">'Url'</span>],</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hash"</span>: [<span class="st">"MD5"</span>, <span class="st">"SHA1"</span>, <span class="st">"SHA256"</span>, <span class="st">'FileHashValue'</span>, <span class="st">'FileHash'</span>, <span class="st">'InitiatingProcessSHA256'</span>]</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>columns <span class="op">=</span> [column <span class="cf">for</span> area <span class="kw">in</span> columns_of_interest.values() <span class="cf">for</span> column <span class="kw">in</span> area]</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hunt(indicators, expression<span class="op">=</span><span class="st">"has"</span>, columns<span class="op">=</span>columns, workspaces<span class="op">=</span><span class="va">None</span>, timespans<span class="op">=</span>[<span class="st">"1d"</span>, <span class="st">"14d"</span>, <span class="st">"90d"</span>, <span class="st">"700d"</span>], take<span class="op">=</span><span class="dv">5000</span>):</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    queries <span class="op">=</span> []</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> workspaces <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        workspaces <span class="op">=</span> list_securityinsights()</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        df <span class="op">=</span> list_securityinsights()</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        workspaces <span class="op">=</span> df[df[<span class="st">"customerId"</span>].isin(workspaces)]</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    querylogged <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> indicator <span class="kw">in</span> indicators:</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> expression <span class="kw">not</span> <span class="kw">in</span> [<span class="st">'has_all'</span>]:</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>            indicator <span class="op">=</span> <span class="ss">f"'</span><span class="sc">{</span>indicator<span class="sc">}</span><span class="ss">'"</span> <span class="co"># wrap indicator in quotes unless expecting dynamic</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> querylogged:</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>            logger.info(<span class="ss">f"Test Query: find where </span><span class="sc">{</span>columns[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>expression<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>indicator<span class="sc">}</span><span class="ss"> | take </span><span class="sc">{</span>take<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>            querylogged <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> chunk <span class="kw">in</span> chunks([<span class="ss">f"</span><span class="sc">{</span>column<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>expression<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>indicator<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> column <span class="kw">in</span> columns], <span class="dv">20</span>):</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>            query <span class="op">=</span> <span class="st">" or "</span>.join(chunk)</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>            query <span class="op">=</span> <span class="ss">f"find where </span><span class="sc">{</span>query<span class="sc">}</span><span class="ss"> | take </span><span class="sc">{</span>take<span class="sc">}</span><span class="ss"> | extend placeholder_=dynamic(</span><span class="ch">{{</span><span class="ss">'':null</span><span class="ch">}}</span><span class="ss">) | evaluate bag_unpack(column_ifexists('pack_', placeholder_))"</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>            queries.append(query)</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> timespan <span class="kw">in</span> timespans:</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>        results <span class="op">=</span> pandas.concat(loganalytics_query(queries, pandas.Timedelta(timespan), sentinel_workspaces <span class="op">=</span> workspaces).values())</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">'placeholder_'</span> <span class="kw">in</span> results.columns:</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>            results <span class="op">=</span> results.drop(<span class="st">'placeholder_'</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> results.empty:</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>            logger.info(<span class="ss">f"No results in </span><span class="sc">{</span>timespan<span class="sc">}</span><span class="ss">, extending hunt"</span>)</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        logger.info(<span class="ss">f"Found </span><span class="sc">{</span>indicators<span class="sc">}</span><span class="ss"> in </span><span class="sc">{</span>timespan<span class="sc">}</span><span class="ss">, returning"</span>)</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> results</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">Exception</span>(<span class="st">"No results found!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L148" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="hunt" class="level3">
+<h3 class="anchored" data-anchor-id="hunt">hunt</h3>
+<blockquote class="blockquote">
+<pre><code> hunt (indicators, expression='has', columns=['AADEmail', 'AccountName',
+       'AccountUPN', 'AccountUpn', 'Account', 'CompromisedEntity',
+       'DestinationUserName', 'Computer', 'DisplayName',
+       'EmailSenderAddress', 'FileName', 'FilePath', 'FolderPath',
+       'FullyQualifiedSubjectUserName', 'InitiatingProcessAccountUpn',
+       'MailboxOwnerUPN', 'Name', 'NewProcessName', 'Owner',
+       'ParentProcessName', 'Process', 'CommandLine',
+       'ProcessCommandLine', 'RecipientEmailAddress', 'RequesterUpn',
+       'SenderMailFromAddress', 'SourceIdentity', 'SourceUserName',
+       'SubjectUserName', 'TargetUserName', 'TargetUser', 'Upn',
+       'UserName', 'userName', 'UserPrincipalName', 'Caller',
+       'DestinationUserID', 'SourceUserID', 'UserId', 'CallerIpAddress',
+       'DestinationIP', 'DstIpAddr', 'EmailSourceIpAddress',
+       'IPAddresses', 'IPAddress', 'IpAddress', 'NetworkDestinationIP',
+       'NetworkIP', 'NetworkSourceIP', 'RemoteIP', 'SourceIP',
+       'SrcIpAddr', 'DomainName', 'FileOriginUrl', 'FQDN', 'RemoteUrl',
+       'Url', 'MD5', 'SHA1', 'SHA256', 'FileHashValue', 'FileHash',
+       'InitiatingProcessSHA256'], workspaces=None, timespans=['1d',
+       '14d', '90d', '700d'], take=5000)</code></pre>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>hunt([<span class="st">'("ntdsutil", "ifm")'</span>], expression<span class="op">=</span><span class="st">"has_all"</span>, columns<span class="op">=</span>[<span class="st">"InitiatingProcessCommandLine"</span>, <span class="st">"ProcessCommandLine"</span>, <span class="st">"CommandLine"</span>], timespans<span class="op">=</span>[<span class="st">"90d"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> atlaskit_transformer(inputtext, inputfmt<span class="op">=</span><span class="st">"md"</span>, outputfmt<span class="op">=</span><span class="st">"wiki"</span>, runtime<span class="op">=</span><span class="st">"node"</span>):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> nbdev_squ</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    transformer <span class="op">=</span> dirs.user_cache_path <span class="op">/</span> <span class="ss">f"atlaskit-transformer.bundle_v</span><span class="sc">{</span>nbdev_squ<span class="sc">.</span>__version__<span class="sc">}</span><span class="ss">.js"</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> transformer.exists():</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        transformer_url <span class="op">=</span> <span class="ss">f'</span><span class="sc">{</span>nbdev_squ<span class="sc">.</span>_modidx<span class="sc">.</span>d[<span class="st">"settings"</span>][<span class="st">"git_url"</span>]<span class="sc">}</span><span class="ss">/releases/download/v</span><span class="sc">{</span>nbdev_squ<span class="sc">.</span>__version__<span class="sc">}</span><span class="ss">/atlaskit-transformer.bundle.js'</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        transformer.write_bytes(requests.get(transformer_url).content)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    cmd <span class="op">=</span> [runtime, <span class="bu">str</span>(transformer), inputfmt, outputfmt]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    logger.debug(<span class="st">" "</span>.join(cmd))</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> run(cmd, <span class="bu">input</span><span class="op">=</span>inputtext, text<span class="op">=</span><span class="va">True</span>, capture_output<span class="op">=</span><span class="va">True</span>, check<span class="op">=</span><span class="va">True</span>).stdout</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> CalledProcessError:</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        run(cmd, <span class="bu">input</span><span class="op">=</span>inputtext, text<span class="op">=</span><span class="va">True</span>, check<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L179" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="atlaskit_transformer" class="level3">
+<h3 class="anchored" data-anchor-id="atlaskit_transformer">atlaskit_transformer</h3>
+<blockquote class="blockquote">
+<pre><code> atlaskit_transformer (inputtext, inputfmt='md', outputfmt='wiki',
+                       runtime='node')</code></pre>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(atlaskit_transformer(<span class="st">"""# Heading 1</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="st">- a bullet</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="st">[a link](https://github.com]</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="sentinel-incident-sync-helpers" class="level2">
+<h2 class="anchored" data-anchor-id="sentinel-incident-sync-helpers">Sentinel Incident sync helpers</h2>
+<p>Overall process below will be to grab all the incidents from Sentinel, and save them into individual files per day based on their last updated time. A subsequent process can then load those files (e.g.&nbsp;ingest into ADX) and/or synchronise the updates into Jira.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> security_incidents(start<span class="op">=</span>pandas.Timestamp(<span class="st">"now"</span>, tz<span class="op">=</span><span class="st">"UTC"</span>) <span class="op">-</span> pandas.Timedelta(<span class="st">"1d"</span>), timedelta<span class="op">=</span>pandas.Timedelta(<span class="st">"1d"</span>)):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Queries for security incidents from `start` time for `timedelta` and returns a dataframe</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sorts by TimeGenerated (</span><span class="al">TODO</span><span class="co">)</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    query <span class="op">=</span> <span class="st">"SecurityIncident | summarize arg_max(TimeGenerated, *) by IncidentNumber"</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> query_all(query, timespan<span class="op">=</span>(start.to_pydatetime(), timedelta))</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> security_alerts(start<span class="op">=</span>pandas.Timestamp(<span class="st">"now"</span>, tz<span class="op">=</span><span class="st">"UTC"</span>) <span class="op">-</span> pandas.Timedelta(<span class="st">"1d"</span>), timedelta<span class="op">=</span>pandas.Timedelta(<span class="st">"1d"</span>)):</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Queries for security alerts from `start` time for `timedelta` and returns a dataframe</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sorts by TimeGenerated (</span><span class="al">TODO</span><span class="co">)</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    query <span class="op">=</span> <span class="st">"SecurityAlert | summarize arg_max(TimeGenerated, *) by SystemAlertId"</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> query_all(query, timespan<span class="op">=</span>(start.to_pydatetime(), timedelta))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L199" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="security_alerts" class="level3">
+<h3 class="anchored" data-anchor-id="security_alerts">security_alerts</h3>
+<blockquote class="blockquote">
+<pre><code> security_alerts (start=Timestamp('2023-05-24 00:09:41.965365+0000',
+                  tz='UTC'), timedelta=Timedelta('1 days 00:00:00'))</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/wagov/nbdev-squ/blob/main/nbdev_squ/api.py#L193" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="security_incidents" class="level3">
+<h3 class="anchored" data-anchor-id="security_incidents">security_incidents</h3>
+<blockquote class="blockquote">
+<pre><code> security_incidents (start=Timestamp('2023-05-24 00:09:41.965132+0000',
+                     tz='UTC'), timedelta=Timedelta('1 days 00:00:00'))</code></pre>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> security_incidents(start<span class="op">=</span>pandas.Timestamp(<span class="st">"now"</span>, tz<span class="op">=</span><span class="st">"UTC"</span>) <span class="op">-</span> pandas.Timedelta(<span class="st">"14d"</span>), timedelta<span class="op">=</span>pandas.Timedelta(<span class="st">"14d"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
