@@ -5,7 +5,7 @@
 ## Install
 
 ``` sh
-pip install nbdev_squ
+pip install https://github.com/wagov/nbdev-squ/archive/refs/heads/main.tar.gz
 ```
 
 ## How to use
