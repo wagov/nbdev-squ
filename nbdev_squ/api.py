@@ -153,27 +153,16 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
         df = list_securityinsights()
         workspaces = df[df["customerId"].isin(workspaces)]
     querylogged = False
-    if expression in ['has_any']:
-        query = f"let indicators = dynamic([{indicators}]);"
-
-        for count, column in enumerate(columns):
-            if count == 0:
-                query += f"find where {column} has_any (indicators)"
-            else:
-                query += f" or {column} has_any (indicators)"
-
-        queries.append(query)
-    else:
-        for indicator in indicators:
-            if expression not in ['has_all']:
-                indicator = f"'{indicator}'" # wrap indicator in quotes unless expecting dynamic
-            if not querylogged:
-                logger.info(f"Test Query: find where {columns[0]} {expression} {indicator} | take {take}")
-                querylogged = True
-            for chunk in chunks([f"{column} {expression} {indicator}" for column in columns], 20):
-                query = " or ".join(chunk)
-                query = f"find where {query} | take {take} | extend placeholder_=dynamic({{'':null}}) | evaluate bag_unpack(column_ifexists('pack_', placeholder_))"
-                queries.append(query)
+    for indicator in indicators:
+        if expression not in ['has_all']:
+            indicator = f"'{indicator}'" # wrap indicator in quotes unless expecting dynamic
+        if not querylogged:
+            logger.info(f"Test Query: find where {columns[0]} {expression} {indicator} | take {take}")
+            querylogged = True
+        for chunk in chunks([f"{column} {expression} {indicator}" for column in columns], 20):
+            query = " or ".join(chunk)
+            query = f"find where {query} | take {take} | extend placeholder_=dynamic({{'':null}}) | evaluate bag_unpack(column_ifexists('pack_', placeholder_))"
+            queries.append(query)
     for timespan in timespans:
         results = pandas.concat(loganalytics_query(queries, pandas.Timedelta(timespan), sentinel_workspaces = workspaces).values())
         if 'placeholder_' in results.columns:
