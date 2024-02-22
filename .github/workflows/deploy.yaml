@@ -12,7 +12,7 @@ jobs:
     - name: Upload to pages branch
       uses: fastai/workflows/quarto-ghp@master
       with:
-        version: '3.10' 
+        version: '3.11' 
     - name: npm build
       run: npm install && npm run build
     - name: npm release upload

@@ -6,7 +6,7 @@ __all__ = ['logger', 'clients', 'columns_of_interest', 'columns', 'Clients', 'li
            'atlaskit_transformer', 'security_incidents', 'security_alerts']
 
 # %% ../nbs/01_api.ipynb 3
-import pandas, json, logging, time, requests, httpx_cache
+import pandas, json, logging, time, requests, httpx_cache, io
 from .core import *
 from diskcache import memoize_stampede
 from subprocess import run, CalledProcessError
@@ -61,7 +61,7 @@ class Clients:
 
 clients = Clients()
 
-# %% ../nbs/01_api.ipynb 9
+# %% ../nbs/01_api.ipynb 13
 @memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
 def list_workspaces(fmt: str = "df", # df, csv, json, list
                     agency: str = "ALL"): # Agency alias or ALL
@@ -83,7 +83,7 @@ def list_workspaces(fmt: str = "df", # df, csv, json, list
     else:
         raise ValueError("Invalid format")
 
-# %% ../nbs/01_api.ipynb 13
+# %% ../nbs/01_api.ipynb 17
 @memoize_stampede(cache, expire=60 * 60 * 3) # cache for 3 hours
 def list_subscriptions():
     return pandas.DataFrame(azcli(["account", "list"]))["id"].unique()
@@ -174,7 +174,7 @@ def query_all(query, fmt="df", timespan=pandas.Timedelta("14d")):
     else:
         raise ValueError("Invalid format")
 
-# %% ../nbs/01_api.ipynb 16
+# %% ../nbs/01_api.ipynb 20
 columns_of_interest = benedict({
     "name": ['AADEmail', 'AccountName', 'AccountUPN', 'AccountUpn', 'Account', 'CompromisedEntity', 'DestinationUserName', 
              "Computer", "DisplayName", "EmailSenderAddress", "FileName", 'FilePath', "FolderPath", 'FullyQualifiedSubjectUserName', 'InitiatingProcessAccountUpn',
@@ -234,7 +234,7 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
     else:
         raise Exception("No results found!")
 
-# %% ../nbs/01_api.ipynb 18
+# %% ../nbs/01_api.ipynb 22
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node"):
     import nbdev_squ
     transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{nbdev_squ.__version__}.js"
@@ -248,7 +248,7 @@ def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="no
     except CalledProcessError:
         run(cmd, input=inputtext, text=True, check=True)
 
-# %% ../nbs/01_api.ipynb 21
+# %% ../nbs/01_api.ipynb 25
 def security_incidents(start=pandas.Timestamp("now", tz="UTC") - pandas.Timedelta("1d"), timedelta=pandas.Timedelta("1d")):
     # Queries for security incidents from `start` time for `timedelta` and returns a dataframe
     # Sorts by TimeGenerated (TODO)
