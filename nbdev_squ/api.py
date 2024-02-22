@@ -28,6 +28,7 @@ class Clients:
     """
     @cached_property
     def config(self):
+        login()
         return cache.get("config", load_config())
 
     @cached_property

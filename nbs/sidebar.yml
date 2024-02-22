@@ -4,4 +4,3 @@ website:
       - index.ipynb
       - 00_core.ipynb
       - 01_api.ipynb
-      - 02_clients.ipynb
