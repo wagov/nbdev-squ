@@ -239,7 +239,7 @@ def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="no
     import nbdev_squ
     transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{nbdev_squ.__version__}.js"
     if not transformer.exists():
-        transformer_url = f'{nbdev_squ._modidx.d["settings"]["git_url"]}/releases/download/v{nbdev_squ.__version__}/atlaskit-transformer.bundle.js'
+        transformer_url = f'https://github.com/wagov/nbdev-squ/releases/download/v{nbdev_squ.__version__}/atlaskit-transformer.bundle.js'
         transformer.write_bytes(requests.get(transformer_url).content)
     cmd = [runtime, str(transformer), inputfmt, outputfmt]
     logger.debug(" ".join(cmd))
