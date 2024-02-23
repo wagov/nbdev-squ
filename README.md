@@ -5,9 +5,36 @@
 
 ## Install
 
+Below is how to install in a plain python 3.11+ environment
+
 ``` sh
-pip install https://github.com/wagov/nbdev-squ/archive/refs/tags/v1.3.0.tar.gz
+pip install https://github.com/wagov/nbdev-squ/archive/refs/tags/v1.3.1.tar.gz
 ```
+
+The installation can also be run in a notebook (we tend to use
+[JupyterLab Desktop](https://github.com/jupyterlab/jupyterlab-desktop)
+for local dev). The `SQU_CONFIG` env var indicates to nbdev_squ it
+should load the json secret *squconfig-`my_keyvault_tenantid`* from the
+`my_kevault_name` keyvault.
+
+``` python
+%pip install https://github.com/wagov/nbdev-squ/archive/refs/tags/v1.3.1.tar.gz
+import os; os.environ["SQU_CONFIG"] = "{{ my_keyvault_name }}/{{ my_keyvault_tenantid }}" 
+
+from nbdev_squ import api
+# do cool notebook stuff with api
+```
+
+### Security considerations
+
+The contents of the keyvault secret are loaded into memory and cached in
+the
+[user_cache_dir](https://platformdirs.readthedocs.io/en/latest/api.html#cache-directory)
+which should be a temporary secure directory restricted to the single
+user. Please ensure that the system this library is used on disallows
+access and/or logging of the user cache directory to external locations,
+and is on an encrypted disk (a common approach is to use isolated VMs
+and workstations for sensitive activities).
 
 ## How to use
 
@@ -20,6 +47,12 @@ be done automatically from json in a keyvault by setting the env var
 
 ``` bash
 export SQU_CONFIG="{{ keyvault }}/{{ tenantid }}"
+```
+
+Can be done in python before import from nbdev_squ as well:
+
+``` python
+import os; os.environ["SQU_CONFIG"] = "{{ keyvault }}/{{ tenantid }}"
 ```
 
 ``` python
@@ -89,4 +122,30 @@ df = api.query_all("""union withsource="_table" *
 ``` python
 import json
 pandas.DataFrame(list(df["pack"].apply(json.loads)))
+```
+
+## Secrets template
+
+The below json can be used as a template for saving your own json into
+*`my_keyvault_name`/squconfig-`my_keyvault_tenantid`* to use with this
+library:
+
+``` json
+{
+  "config_version": "20240101 - added ??? access details",
+  "datalake_blob_prefix": "https://???/???",
+  "datalake_subscription": "???",
+  "datalake_account": "???.blob.core.windows.net",
+  "datalake_container": "???",
+  "kql_baseurl": "https://raw.githubusercontent.com/???",
+  "azure_dataexplorer": "https://???.???.kusto.windows.net/???",
+  "tenant_id": "???",
+  "jira_url": "https://???.atlassian.net",
+  "jira_username": "???@???",
+  "jira_password": "???",
+  "runzero_apitoken": "???",
+  "abuseipdb_api_key": "???",
+  "tenable_access_key": "???",
+  "tenable_secret_key": "???",
+}
 ```
