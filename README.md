@@ -8,7 +8,7 @@
 Below is how to install in a plain python 3.11+ environment
 
 ``` sh
-pip install https://github.com/wagov/nbdev-squ/archive/refs/tags/v1.3.1.tar.gz
+https://github.com/wagov/nbdev-squ/releases/download/v1.3.2/nbdev_squ-1.3.2-py3-none-any.whl
 ```
 
 The installation can also be run in a notebook (we tend to use
@@ -18,7 +18,7 @@ should load the json secret *squconfig-`my_keyvault_tenantid`* from the
 `my_kevault_name` keyvault.
 
 ``` python
-%pip install https://github.com/wagov/nbdev-squ/archive/refs/tags/v1.3.1.tar.gz
+%pip install https://github.com/wagov/nbdev-squ/releases/download/v1.3.2/nbdev_squ-1.3.2-py3-none-any.whl
 import os; os.environ["SQU_CONFIG"] = "{{ my_keyvault_name }}/{{ my_keyvault_tenantid }}" 
 
 from nbdev_squ import api

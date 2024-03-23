@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages and build js release
+name: Deploy to GitHub Pages and build release if tagged
 
 permissions:
   contents: write
@@ -13,10 +13,10 @@ jobs:
       uses: fastai/workflows/quarto-ghp@master
       with:
         version: '3.11' 
-    - name: npm build
-      run: npm install && npm run build
-    - name: npm release upload
+    - name: build
+      run: ./build.sh
+    - name: release upload
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: atlaskit-transformer.bundle.js
+        files: dist/*

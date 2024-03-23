@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "@atlaskit/editor-json-transformer": "^8.10.24",
-    "@atlaskit/editor-markdown-transformer": "^5.3.6",
-    "@atlaskit/editor-wikimarkup-transformer": "^11.2.40",
-    "esbuild": "^0.20.1"
+    "@atlaskit/editor-json-transformer": "^8.10.29",
+    "@atlaskit/editor-markdown-transformer": "^5.4.5",
+    "@atlaskit/editor-wikimarkup-transformer": "^11.2.46",
+    "esbuild": "^0.20.2"
   },
   "scripts": {
-    "build": "esbuild atlaskit-transformer.js --bundle --platform=node --outfile=atlaskit-transformer.bundle.js"
+    "build": "esbuild atlaskit-transformer.js --bundle --platform=node --outfile=nbdev_squ/atlaskit-transformer.bundle.js"
   }
 }

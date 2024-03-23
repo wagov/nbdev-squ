@@ -6,17 +6,15 @@ __all__ = ['logger', 'clients', 'columns_of_interest', 'columns', 'Clients', 'li
            'atlaskit_transformer', 'security_incidents', 'security_alerts']
 
 # %% ../nbs/01_api.ipynb 3
-import pandas, json, logging, time, requests, httpx_cache, io
+import pandas, json, logging, time, requests, io, pkgutil
 from .core import *
 from diskcache import memoize_stampede
+from importlib.metadata import version
 from subprocess import run, CalledProcessError
 from azure.monitor.query import LogsQueryClient, LogsBatchQuery, LogsQueryStatus
 from azure.identity import AzureCliCredential
 from benedict import benedict
 from functools import cached_property
-from abuseipdb_wrapper import AbuseIPDB
-from atlassian import Jira
-from tenable.io import TenableIO
 
 # %% ../nbs/01_api.ipynb 5
 logger = logging.getLogger(__name__)
@@ -36,6 +34,7 @@ class Clients:
         """
         Returns a runzero client
         """
+        import httpx_cache
         return httpx_cache.Client(base_url="https://console.rumble.run/api/v1.0", headers={"Authorization": f"Bearer {self.config.runzero_apitoken}"})
 
     @cached_property
@@ -43,13 +42,15 @@ class Clients:
         """
         Returns an abuseipdb client
         """
-        return AbuseIPDB(API_KEY=self.config.abuseipdb_api_key)
+        from abuseipdb_wrapper import AbuseIPDB
+        return AbuseIPDB(api_key=self.config.abuseipdb_api_key)
 
     @cached_property
     def jira(self):
         """
         Returns a jira client
         """
+        from atlassian import Jira
         return Jira(url=self.config.jira_url, username=self.config.jira_username, password=self.config.jira_password)
 
     @cached_property
@@ -57,6 +58,7 @@ class Clients:
         """
         Returns a TenableIO client
         """
+        from tenable.io import TenableIO
         return TenableIO(self.config.tenable_access_key, self.config.tenable_secret_key)
 
 
@@ -237,11 +239,9 @@ def hunt(indicators, expression="has", columns=columns, workspaces=None, timespa
 
 # %% ../nbs/01_api.ipynb 22
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node"):
-    import nbdev_squ
-    transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{nbdev_squ.__version__}.js"
+    transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{version('nbdev_squ')}.js"
     if not transformer.exists():
-        transformer_url = f'https://github.com/wagov/nbdev-squ/releases/download/v{nbdev_squ.__version__}/atlaskit-transformer.bundle.js'
-        transformer.write_bytes(requests.get(transformer_url).content)
+        transformer.write_bytes(pkgutil.get_data("nbdev_squ", "atlaskit-transformer.bundle.js"))
     cmd = [runtime, str(transformer), inputfmt, outputfmt]
     logger.debug(" ".join(cmd))
     try:
