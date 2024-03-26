@@ -6,7 +6,7 @@ __all__ = ['logger', 'clients', 'columns_of_interest', 'columns', 'Clients', 'li
            'atlaskit_transformer', 'security_incidents', 'security_alerts']
 
 # %% ../nbs/01_api.ipynb 3
-import pandas, json, logging, time, requests, io, pkgutil
+import pandas, json, logging, time, requests, io, pkgutil, httpx_cache
 from .core import *
 from diskcache import memoize_stampede
 from importlib.metadata import version
@@ -15,6 +15,8 @@ from azure.monitor.query import LogsQueryClient, LogsBatchQuery, LogsQueryStatus
 from azure.identity import AzureCliCredential
 from benedict import benedict
 from functools import cached_property
+from atlassian import Jira
+from tenable.io import TenableIO
 
 # %% ../nbs/01_api.ipynb 5
 logger = logging.getLogger(__name__)
@@ -34,7 +36,6 @@ class Clients:
         """
         Returns a runzero client
         """
-        import httpx_cache
         return httpx_cache.Client(base_url="https://console.rumble.run/api/v1.0", headers={"Authorization": f"Bearer {self.config.runzero_apitoken}"})
 
     @cached_property
@@ -50,7 +51,6 @@ class Clients:
         """
         Returns a jira client
         """
-        from atlassian import Jira
         return Jira(url=self.config.jira_url, username=self.config.jira_username, password=self.config.jira_password)
 
     @cached_property
@@ -58,7 +58,6 @@ class Clients:
         """
         Returns a TenableIO client
         """
-        from tenable.io import TenableIO
         return TenableIO(self.config.tenable_access_key, self.config.tenable_secret_key)
 
 

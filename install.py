@@ -12,15 +12,5 @@ run(["npm", "install"])
 run(["npm", "run", "build"])
 run(["nbdev_clean"])
 run(["nbdev_export"])
-
-config = configparser.ConfigParser()
-config.read('settings.ini')
-version = config.get("DEFAULT", "version")
-git_url = config.get("DEFAULT", "git_url")
-latest_download = f"{git_url}/releases/download/v{version}/nbdev_squ-{version}-py3-none-any.whl"
-index_text = open("nbs/index.ipynb").read()
-with open("nbs/index.ipynb", "w") as index_nb:
-    index_nb.write(re.sub(f"{git_url}.*?-any.whl", latest_download, index_text))
-
 run(["nbdev_readme"])
 run(["nbdev_docs"])
