@@ -27,4 +27,10 @@ d = { 'settings': { 'branch': 'main',
                                 'nbdev_squ.core.azcli': ('core.html#azcli', 'nbdev_squ/core.py'),
                                 'nbdev_squ.core.datalake_path': ('core.html#datalake_path', 'nbdev_squ/core.py'),
                                 'nbdev_squ.core.load_config': ('core.html#load_config', 'nbdev_squ/core.py'),
-                                'nbdev_squ.core.login': ('core.html#login', 'nbdev_squ/core.py')}}}
+                                'nbdev_squ.core.login': ('core.html#login', 'nbdev_squ/core.py')},
+            'nbdev_squ.legacy': { 'nbdev_squ.legacy.adx_query': ('legacy.html#adx_query', 'nbdev_squ/legacy.py'),
+                                  'nbdev_squ.legacy.adxtable2df': ('legacy.html#adxtable2df', 'nbdev_squ/legacy.py'),
+                                  'nbdev_squ.legacy.export_jira_issues': ('legacy.html#export_jira_issues', 'nbdev_squ/legacy.py'),
+                                  'nbdev_squ.legacy.flatten': ('legacy.html#flatten', 'nbdev_squ/legacy.py'),
+                                  'nbdev_squ.legacy.sentinel_beautify_local': ( 'legacy.html#sentinel_beautify_local',
+                                                                                'nbdev_squ/legacy.py')}}}
