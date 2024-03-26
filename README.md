@@ -5,6 +5,9 @@
 
 ## Install
 
+[![Python Packaging Index -
+Version](https://img.shields.io/pypi/v/nbdev-squ.png)](https://pypi.org/project/nbdev-squ/)
+
 Below is how to install in a plain python 3.11+ environment
 
 ``` sh
