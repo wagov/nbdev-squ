@@ -5,10 +5,10 @@
 
 ## Install
 
-[![Python Packaging Index -
-Version](https://img.shields.io/pypi/v/nbdev-squ.svg)](https://pypi.org/project/nbdev-squ/)
 [![GitHub Actions Workflow
-Status](https://img.shields.io/github/actions/workflow/status/wagov/nbdev-squ/deploy.yaml)](https://github.com/wagov/nbdev-squ/actions/workflows/deploy.yaml)
+Status](https://img.shields.io/github/actions/workflow/status/wagov/nbdev-squ/deploy.yaml.svg?logo=github)](https://github.com/wagov/nbdev-squ/actions/workflows/deploy.yaml)
+[![Python Packaging Index -
+Version](https://img.shields.io/pypi/v/nbdev-squ.svg?logo=pypi)](https://pypi.org/project/nbdev-squ/)
 
 Below is how to install in a plain python 3.11+ environment
 

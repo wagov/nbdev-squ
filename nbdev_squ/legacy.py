@@ -110,7 +110,7 @@ def flatten(nested_dict, parent_key='', sep='_'):
         new_key = f"{parent_key}{sep}{key}" if parent_key else key
         
         if isinstance(value, dict):
-            flat_dict.update(flatten_dict(value, new_key, sep))
+            flat_dict.update(flatten(value, new_key, sep))
         else:
             flat_dict[new_key] = value
     
