@@ -10,7 +10,7 @@ Status](https://img.shields.io/github/actions/workflow/status/wagov/nbdev-squ/de
 [![Python Packaging Index -
 Version](https://img.shields.io/pypi/v/nbdev-squ.svg?logo=pypi)](https://pypi.org/project/nbdev-squ/)
 [![OpenSSF
-Scorecard](https://api.securityscorecards.dev/projects/github.com/wagov/nbdev-squ/badge.png)](https://securityscorecards.dev/viewer/?uri=github.com/wagov/nbdev-squ)
+Scorecard](https://img.shields.io/ossf-scorecard/github.com/wagov/nbdev-squ.svg?label=openssf%20scorecard)](https://securityscorecards.dev/viewer/?uri=github.com/wagov/nbdev-squ)
 
 Below is how to install in a plain python 3.11+ environment
 
