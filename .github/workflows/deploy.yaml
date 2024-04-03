@@ -34,19 +34,19 @@ jobs:
           quarto.org:443
           registry.npmjs.org:443
           www.quarto.org:443
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
       with:
         python-version: '3.11'
-    - uses: quarto-dev/quarto-actions/setup@v2
+    - uses: quarto-dev/quarto-actions/setup@c1b50d36cf3c22b3dc7e530bd1b36634e824e545 # v2.1.4
     - run: python install.py
     - name: Setup Pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
       with:
         # Upload built _docs
         path: '_docs'
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
