@@ -23,7 +23,17 @@ jobs:
     - name: Harden Runner
       uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
       with:
-        egress-policy: audit
+        egress-policy: block
+        allowed-endpoints: >
+          api.github.com:443
+          download.pytorch.org:443
+          files.pythonhosted.org:443
+          github.com:443
+          objects.githubusercontent.com:443
+          pypi.org:443
+          quarto.org:443
+          registry.npmjs.org:443
+          www.quarto.org:443
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
