@@ -1,32 +1,42 @@
-name: Deploy to GitHub Pages and build
+name: Build and upload docs to GitHub Pages
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 on: ["workflow_dispatch", "push"]
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps: 
     - name: Harden Runner
       uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
       with:
-        egress-policy: block
-        allowed-endpoints: >
-          download.pytorch.org:443
-          files.pythonhosted.org:443
-          github.com:443
-          objects.githubusercontent.com:443
-          pypi.org:443
-          quarto.org:443
-          registry.npmjs.org:443
-          www.quarto.org:443
-
-
-    - name: Upload to pages branch
-      uses: fastai/workflows/quarto-ghp@6f01ea106ba2b565c66ad88a826bdbc4d7e378c9 # master
+        egress-policy: audit
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
-        version: '3.11' 
-    - name: build
-      run: ./build.sh
+        python-version: '3.11'
+        cache: 'pip' # caching pip dependencies
+    - run: python install.py
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        # Upload built _docs
+        path: '_docs'
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
