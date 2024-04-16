@@ -14,7 +14,6 @@ import logging, pandas, json
 logger = logging.getLogger(__name__)
 
 # %% ../nbs/02_legacy.ipynb 6
-@memoize_stampede(api.cache, expire=60 * 5) # cache for 5 mins
 def adx_query(kql):
     """
     Run a kusto query
