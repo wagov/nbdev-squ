@@ -3,11 +3,13 @@
 # %% auto 0
 __all__ = ['logger', 'clients', 'columns_of_interest', 'columns', 'Clients', 'list_workspaces_safe', 'list_workspaces',
            'list_subscriptions', 'list_securityinsights_safe', 'list_securityinsights', 'chunks', 'loganalytics_query',
-           'query_all', 'finalise_query', 'hunt', 'atlaskit_transformer', 'security_incidents', 'security_alerts']
+           'query_all', 'finalise_query', 'hunt', 'atlaskit_transformer', 'security_incidents', 'security_alerts',
+           'Plugin']
 
 # %% ../nbs/01_api.ipynb 3
 import pandas, json, logging, time, requests, io, pkgutil, httpx_cache
 from .core import *
+from pathlib import Path
 from diskcache import memoize_stampede
 from importlib.metadata import version
 from subprocess import run, CalledProcessError
@@ -17,6 +19,7 @@ from benedict import benedict
 from functools import cached_property
 from atlassian import Jira
 from tenable.io import TenableIO
+from dbt.adapters.duckdb.plugins import BasePlugin, SourceConfig
 
 # %% ../nbs/01_api.ipynb 5
 logger = logging.getLogger(__name__)
@@ -268,3 +271,32 @@ def security_alerts(start=pandas.Timestamp("now", tz="UTC") - pandas.Timedelta("
     # Sorts by TimeGenerated (TODO)
     query = "SecurityAlert | summarize arg_max(TimeGenerated, *) by SystemAlertId"
     return query_all(query, timespan=(start.to_pydatetime(), timedelta))
+
+# %% ../nbs/01_api.ipynb 28
+class Plugin(BasePlugin):
+    def initialize(self, config):
+        login()
+
+    def configure_cursor(self, cursor):
+        pass
+
+    def load(self, source_config: SourceConfig):
+        if "kql_path" in source_config:
+            kql_path = source_config["kql_path"]
+            kql_path = kql_path.format(**source_config.as_dict())
+            query = Path(kql_path).read_text()
+            return query_all(query, timespan=pandas.Timedelta(source_config.get("timespan", "14d")))
+            raise Exception("huh")
+        elif "list_workspaces" in source_config: # untested
+            return list_workspaces()
+        elif "client_api" in source_config: # untested
+            api_result = getattr(clients, source_config["client_api"])(**json.loads(source_config.get("kwargs", "{}")))
+            if isinstance(api_result, pandas.DataFrame):
+                return api_result
+            else:
+                return pandas.DataFrame(api_result)
+        else:
+            raise Exception("No valid config found for squ plugin (kql_path or api required)")
+
+    def default_materialization(self):
+        return "view"

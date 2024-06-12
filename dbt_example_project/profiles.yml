@@ -2,12 +2,9 @@ default:
   outputs:
     dev:
       type: duckdb
-      path: dev.duckdb
-      threads: 1
-
-    prod:
-      type: duckdb
-      path: prod.duckdb
-      threads: 4
+      path: target/dev.duckdb
+      plugins: 
+        - module: nbdev_squ.api
+          alias: squ
 
   target: dev

@@ -1,0 +1,1 @@
+select * from {{source('kql_source', 'T1547_001')}}

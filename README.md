@@ -48,9 +48,9 @@ and workstations for sensitive activities).
 *Note: If you create/use a Github Codespace on any of the wagov repos,
 SQU_CONFIG should be configured automatically.*
 
-Before using, config needs to be loaded into `squ.core.cache`, which can
-be done automatically from json in a keyvault by setting the env var
-`SQU_CONFIG` to `"keyvault/tenantid"`.
+Before using, config needs to be loaded into `nbdev_squ.core.cache`,
+which can be done automatically from json in a keyvault by setting the
+env var `SQU_CONFIG` to `"keyvault/tenantid"`.
 
 ``` bash
 export SQU_CONFIG="{{ keyvault }}/{{ tenantid }}"
