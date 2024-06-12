@@ -2,7 +2,6 @@
 # This is meant to be run to setup and prep for committing a release
 # use nbdev_bump_version to increment the version itself then rerun this to update README.md _docs etc
 from subprocess import run
-import configparser, re
 
 run(["pip", "install", "nbdev"])
 run(["pip", "install", "-e", "."]) # get current project in dev mode

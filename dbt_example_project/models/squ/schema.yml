@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: kql_source
+    config:
+      plugin: squ
+    meta:
+      kql_path: "models/squ/{name}.kql"
+    tables:
+    - name: T1547_001
+
+models:
+  - name: hunt
+    config:
+      materialized: table

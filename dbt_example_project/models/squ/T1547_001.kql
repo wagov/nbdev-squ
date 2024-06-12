@@ -1,0 +1,7 @@
+let selection= dynamic(['reg',' ADD', @'Software\Microsoft\Windows\CurrentVersion\Run']);
+let filter_known = dynamic(['Discord.exe','Skype.exe','LiveChat.exe','Promethean Desktop.exe']);
+DeviceProcessEvents
+| where ActionType == "ProcessCreated"
+| where ProcessCommandLine has_all (selection)
+| where InitiatingProcessFileName !in (filter_known) //Known False-Positive
+| where ProcessCommandLine !contains "PaperCut"
