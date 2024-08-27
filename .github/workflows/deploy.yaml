@@ -41,7 +41,7 @@ jobs:
     - uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5.1.1
       with:
         python-version: '3.11'
-    - uses: quarto-dev/quarto-actions/setup@c1b50d36cf3c22b3dc7e530bd1b36634e824e545 # v2.1.4
+    - uses: quarto-dev/quarto-actions/setup@6cb292a31eb3968e78acc56a508c3cc20500376a # v2.1.5
     - run: python install.py
     - name: Setup Pages
       uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
