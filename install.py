@@ -6,7 +6,7 @@ from subprocess import run
 run(["pip", "install", "nbdev"])
 run(["pip", "install", "-e", "."]) # get current project in dev mode
 run("quarto --version || nbdev_install", shell=True)
-run(["npx", "npm-check-updates", "-u"]) # convenient way to freshen package.json on each release
+run(["npx", "-y", "npm-check-updates", "-u"]) # convenient way to freshen package.json on each release
 run(["npm", "install"])
 run(["npm", "run", "build"])
 run(["nbdev_clean"])
