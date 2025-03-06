@@ -7,7 +7,7 @@ __all__ = ['logger', 'clients', 'columns_of_interest', 'columns', 'Clients', 'li
            'Plugin']
 
 # %% ../nbs/01_api.ipynb 3
-import pandas, json, logging, time, requests, io, pkgutil, httpx_cache
+import pandas, json, logging, time, requests, io, pkgutil, httpx
 from .core import *
 from pathlib import Path
 from diskcache import memoize_stampede
@@ -39,7 +39,7 @@ class Clients:
         """
         Returns a runzero client
         """
-        return httpx_cache.Client(base_url="https://console.rumble.run/api/v1.0", headers={"Authorization": f"Bearer {self.config.runzero_apitoken}"})
+        return httpx.Client(base_url="https://console.rumble.run/api/v1.0", headers={"Authorization": f"Bearer {self.config.runzero_apitoken}"})
 
     @cached_property
     def abuseipdb(self):

@@ -12,7 +12,7 @@ Version](https://img.shields.io/pypi/v/nbdev-squ.svg?logo=pypi)](https://pypi.or
 [![OpenSSF
 Scorecard](https://img.shields.io/ossf-scorecard/github.com/wagov/nbdev-squ.svg?label=openssf%20scorecard)](https://securityscorecards.dev/viewer/?uri=github.com/wagov/nbdev-squ)
 
-Below is how to install in a plain python 3.11+ environment
+Below is how to install in a plain python 3.12+ environment
 
 ``` sh
 pip install nbdev-squ
