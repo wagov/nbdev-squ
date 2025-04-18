@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@atlaskit/editor-json-transformer": "^8.24.0",
+    "@atlaskit/editor-json-transformer": "^8.24.2",
     "@atlaskit/editor-markdown-transformer": "^5.16.0",
     "@atlaskit/editor-wikimarkup-transformer": "^11.15.1",
     "esbuild": "^0.25.1"
