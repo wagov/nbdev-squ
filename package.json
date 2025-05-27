@@ -3,7 +3,7 @@
     "@atlaskit/editor-json-transformer": "^8.24.0",
     "@atlaskit/editor-markdown-transformer": "^5.16.0",
     "@atlaskit/editor-wikimarkup-transformer": "^11.15.1",
-    "esbuild": "^0.25.1"
+    "esbuild": "^0.25.5"
   },
   "scripts": {
     "build": "esbuild atlaskit-transformer.js --bundle --platform=node --outfile=nbdev_squ/atlaskit-transformer.bundle.js"
