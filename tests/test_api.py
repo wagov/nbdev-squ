@@ -13,7 +13,7 @@ def test_clients_class_exists():
 
 
 def test_jira_client_cloud_support():
-    """Test that Jira client is configured for cloud with enhanced_jql support."""
+    """Test that Jira client is configured for cloud."""
     with patch("wagov_squ.api.login"), patch("wagov_squ.api.load_config", return_value={}):
         clients = Clients()
 
@@ -31,7 +31,7 @@ def test_jira_client_cloud_support():
                 # Access the jira client
                 clients.jira
 
-                # Verify it was created with cloud=True for enhanced API support
+                # Verify it was created with cloud=True
                 mock_jira.assert_called_once_with(
                     url="https://example.atlassian.net",
                     username="user",
@@ -39,12 +39,9 @@ def test_jira_client_cloud_support():
                     cloud=True,
                 )
 
-                # Verify enhanced_jql method exists (library provides this)
-                assert hasattr(mock_jira_instance, "enhanced_jql")
 
-
-def test_jira_enhanced_api_usage():
-    """Test that we can use the enhanced_jql method from atlassian-python-api."""
+def test_jira_basic_usage():
+    """Test that we can use standard Jira API methods."""
     from wagov_squ.api import Clients
 
     with patch("wagov_squ.api.login"), patch("wagov_squ.api.load_config", return_value={}):
@@ -62,26 +59,26 @@ def test_jira_enhanced_api_usage():
             mock_jira_instance = Mock()
             mock_jira.return_value = mock_jira_instance
 
-            # Mock enhanced_jql response
+            # Mock jql response
             mock_response = {
                 "issues": [{"id": "1", "key": "TEST-1"}],
                 "startAt": 0,
                 "maxResults": 100,
                 "total": 1,
             }
-            mock_jira_instance.enhanced_jql.return_value = mock_response
+            mock_jira_instance.jql.return_value = mock_response
 
             jira_client = clients.jira
 
-            # Test calling enhanced_jql (the recommended v3 API method)
-            jira_client.enhanced_jql("project = TEST")
+            # Test calling standard jql method
+            jira_client.jql("project = TEST")
 
-            # Verify the enhanced_jql method was called
-            mock_jira_instance.enhanced_jql.assert_called_once_with("project = TEST")
+            # Verify the jql method was called
+            mock_jira_instance.jql.assert_called_once_with("project = TEST")
 
 
-def test_jira_backward_compatibility():
-    """Test that the standard jql() method now uses enhanced APIs under the hood."""
+def test_jira_client_creation():
+    """Test that Jira client is created correctly."""
     from wagov_squ.api import Clients
 
     with patch("wagov_squ.api.login"), patch("wagov_squ.api.load_config", return_value={}):
@@ -99,27 +96,18 @@ def test_jira_backward_compatibility():
             mock_jira_instance = Mock()
             mock_jira.return_value = mock_jira_instance
 
-            # Mock enhanced_jql response (what gets called under the hood)
-            mock_response = {
-                "issues": [{"id": "1", "key": "TEST-1"}],
-                "startAt": 0,
-                "maxResults": 100,
-                "total": 1,
-            }
-            mock_jira_instance.enhanced_jql.return_value = mock_response
-
             jira_client = clients.jira
 
-            # Test calling the standard jql() method (should use enhanced APIs under hood)
-            jira_client.jql("project = TEST", start=10, limit=50)
-
-            # Verify that enhanced_jql was called instead of the deprecated jql method
-            mock_jira_instance.enhanced_jql.assert_called_once_with(
-                "project = TEST", start=10, limit=50, fields="*all", expand=None
+            # Verify that Jira was instantiated correctly
+            mock_jira.assert_called_once_with(
+                url="https://example.atlassian.net",
+                username="user",
+                password="pass",
+                cloud=True,
             )
 
-            # Verify jql method was NOT called (we're using enhanced under the hood)
-            assert not mock_jira_instance.jql.called
+            # Verify we get the direct Jira client (not wrapped)
+            assert jira_client is mock_jira_instance
 
 
 def test_fmt_enum_import():

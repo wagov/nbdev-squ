@@ -1,4 +1,4 @@
 include LICENSE
 include README.md
-include src/nbdev_squ/atlaskit-transformer.bundle.js
+include src/wagov_squ/atlaskit-transformer.bundle.js
 recursive-exclude * __pycache__

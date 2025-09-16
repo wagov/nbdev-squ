@@ -5,6 +5,7 @@ This allows existing code to continue using 'from nbdev_squ import ...'
 
 import sys
 import warnings
+
 import wagov_squ
 
 # Issue a deprecation warning

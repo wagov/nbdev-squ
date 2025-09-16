@@ -27,11 +27,27 @@ uv sync --dev
 
 ## Configuration
 
+### Azure Key Vault (Recommended)
+
 Set the `SQU_CONFIG` environment variable to specify Azure Key Vault configuration:
 
 ```python
 import os
 os.environ["SQU_CONFIG"] = "keyvault_name/tenant_id"
+```
+
+### Environment Variables (Alternative)
+
+You can also configure services directly with environment variables:
+
+```bash
+export SQU_JIRA_URL="https://yourorg.atlassian.net"
+export SQU_JIRA_USERNAME="user@example.com" 
+export SQU_JIRA_PASSWORD="your-api-token"
+export SQU_RUNZERO_APITOKEN="your-runzero-token"
+export SQU_ABUSEIPDB_API_KEY="your-abuseipdb-key"
+export SQU_TENABLE_ACCESS_KEY="your-tenable-key"
+export SQU_TENABLE_SECRET_KEY="your-tenable-secret"
 ```
 
 ## Quick Start

@@ -56,7 +56,7 @@ def export_jira_issues():
     jira_issues_path = api.datalake_path() / "jira_outputs" / "issues"
 
     def getissues(start_at, jql):
-        # The jql() method now uses Enhanced JQL v3 APIs under the hood automatically
+        # Standard Jira JQL query
         response = api.clients.jira.jql(jql, start=start_at, limit=100)
         next_start = response["startAt"] + response["maxResults"]
         total_rows = response["total"]

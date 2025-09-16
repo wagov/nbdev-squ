@@ -41,6 +41,8 @@ dependencies = [
     "ibis-framework[duckdb]",
     "duckdb",
     "pip>=25.2",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
 ]
 
 [project.optional-dependencies]

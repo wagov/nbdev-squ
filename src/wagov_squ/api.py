@@ -1,8 +1,9 @@
-"""API module for nbdev-squ package with Enhanced Jira support."""
+"""API module for nbdev-squ package."""
 
 __all__ = [
     "logger",
     "clients",
+    "retryer",
     "columns_of_interest",
     "columns",
     "Clients",
@@ -41,51 +42,10 @@ from dbt.adapters.duckdb.plugins import BasePlugin, SourceConfig
 from diskcache import memoize_stampede
 from tenable.io import TenableIO
 
-from .core import azcli, cache, chunks, datalake_path, dirs, httpx, load_config, login
+from .core import azcli, cache, chunks, datalake_path, dirs, httpx, load_config, login, retryer
 from .frame import Fmt, as_pandas, format_output, memtable, read_parquet
 
 logger = logging.getLogger(__name__)
-
-
-class EnhancedJiraWrapper:
-    """
-    Wrapper that makes the standard jql() method use Enhanced JQL v3 APIs under the hood
-    while maintaining backward compatibility for existing users
-    """
-
-    def __init__(self, jira_client):
-        self._jira = jira_client
-
-    def jql(
-        self,
-        jql_str: str,
-        start: int = 0,
-        limit: int = 100,
-        fields: str = "*all",
-        expand: str = None,
-    ):
-        """
-        Standard jql() method that now uses Enhanced JQL v3 APIs under the hood
-        This maintains backward compatibility while using the future-proof APIs
-        """
-        try:
-            # Use the enhanced_jql method (v3 API) instead of the deprecated jql method (v2 API)
-            return self._jira.enhanced_jql(
-                jql_str, start=start, limit=limit, fields=fields, expand=expand
-            )
-        except (AttributeError, TypeError):
-            # Fallback to traditional method if enhanced_jql is not available or has different signature
-            logger.warning("Enhanced JQL not available, falling back to traditional jql() method")
-            return self._jira.jql(jql_str, start=start, limit=limit, fields=fields, expand=expand)
-
-    def enhanced_jql(self, *args, **kwargs):
-        """Direct access to enhanced_jql method for advanced users"""
-        return self._jira.enhanced_jql(*args, **kwargs)
-
-    def __getattr__(self, name):
-        """Delegate all other methods to the underlying Jira client"""
-        return getattr(self._jira, name)
-
 
 class Clients:
     """
@@ -118,17 +78,14 @@ class Clients:
 
     @cached_property
     def jira(self):
-        """
-        Returns a jira client with Enhanced JQL API support
-        The jql() method now uses v3 APIs under the hood for backward compatibility
-        """
+        """Returns a Jira client for issue tracking and project management."""
         jira_client = Jira(
             url=self.config.jira_url,
             username=self.config.jira_username,
             password=self.config.jira_password,
             cloud=True,
         )
-        return EnhancedJiraWrapper(jira_client)
+        return jira_client
 
     @cached_property
     def tio(self):
@@ -426,9 +383,16 @@ def hunt(
 
 
 def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="node"):
-    transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{version('nbdev_squ')}.js"
+    """Transform text using the atlaskit transformer bundle."""
+    bundle_data = pkgutil.get_data("wagov_squ", "atlaskit-transformer.bundle.js")
+    if bundle_data is None:
+        raise FileNotFoundError("atlaskit-transformer.bundle.js not found in wagov_squ package")
+
+    # Cache the bundle using the current package version
+    transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{version('wagov_squ')}.js"
     if not transformer.exists():
-        transformer.write_bytes(pkgutil.get_data("nbdev_squ", "atlaskit-transformer.bundle.js"))
+        transformer.write_bytes(bundle_data)
+
     cmd = [runtime, str(transformer), inputfmt, outputfmt]
     logger.debug(" ".join(cmd))
     try:
@@ -459,30 +423,72 @@ def security_alerts(
 
 class Plugin(BasePlugin):
     def initialize(self, config):
-        login()
+        """Initialize the plugin with Azure authentication."""
+        try:
+            login()
+        except Exception as e:
+            logger.warning(f"Authentication failed during plugin initialization: {e}")
+            # Don't fail initialization, let individual queries handle auth errors
 
     def configure_cursor(self, cursor):
+        """Configure database cursor - no special configuration needed for this plugin."""
         pass
 
     def load(self, source_config: SourceConfig):
-        if "kql_path" in source_config:
-            kql_path = source_config["kql_path"]
-            kql_path = kql_path.format(**source_config.as_dict())
-            query = Path(kql_path).read_text()
-            return query_all(query, timespan=pandas.Timedelta(source_config.get("timespan", "14d")))
-            raise Exception("huh")
-        elif "list_workspaces" in source_config:  # untested
-            return list_workspaces()
-        elif "client_api" in source_config:  # untested
-            api_result = getattr(clients, source_config["client_api"])(
-                **json.loads(source_config.get("kwargs", "{}"))
-            )
-            if isinstance(api_result, pandas.DataFrame):
-                return api_result
+        """
+        Load data based on source configuration.
+        
+        Returns empty DataFrame for expected "no data" situations.
+        Raises DbtRuntimeError for operational failures to let dbt handle transactions properly.
+        """
+        try:
+            if "kql_path" in source_config:
+                # Load and execute KQL query from file
+                kql_path = source_config["kql_path"]
+                kql_path = kql_path.format(**source_config.as_dict())
+                
+                if not Path(kql_path).exists():
+                    logger.info(f"KQL file not found: {kql_path}")
+                    return pandas.DataFrame()
+                
+                query = Path(kql_path).read_text()
+                timespan = pandas.Timedelta(source_config.get("timespan", "14d"))
+                return query_all(query, timespan=timespan)
+                
+            elif "list_workspaces" in source_config:
+                # Return workspace listing
+                return list_workspaces()
+                
+            elif "client_api" in source_config:
+                # Call specific client API method
+                api_method = source_config["client_api"]
+                kwargs = json.loads(source_config.get("kwargs", "{}"))
+                
+                if not hasattr(clients, api_method):
+                    raise ValueError(f"Unknown client API method: {api_method}")
+                    
+                api_result = getattr(clients, api_method)(**kwargs)
+                
+                # Ensure we return a DataFrame
+                if isinstance(api_result, pandas.DataFrame):
+                    return api_result
+                else:
+                    return pandas.DataFrame(api_result)
             else:
-                return pandas.DataFrame(api_result)
-        else:
-            raise Exception("No valid config found for squ plugin (kql_path or api required)")
+                raise ValueError(
+                    "Invalid squ plugin configuration. Must specify one of: "
+                    "kql_path, list_workspaces, or client_api"
+                )
+                
+        except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
+            # Expected "no data" or configuration issues - return empty DataFrame
+            logger.info(f"No data or invalid config: {e}")
+            return pandas.DataFrame()
+        except Exception as e:
+            # Unexpected operational failures - let dbt handle transaction rollback properly
+            from dbt.exceptions import DbtRuntimeError
+            raise DbtRuntimeError(f"squ plugin failed for config {source_config}: {e}") from e
 
     def default_materialization(self):
+        """Default materialization strategy for this plugin."""
         return "view"

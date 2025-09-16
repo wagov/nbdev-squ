@@ -166,7 +166,7 @@ class TestAzureIntegration:
 
 @pytest.mark.integration
 class TestJiraIntegration:
-    """Integration tests for Jira Enhanced API (if configured)."""
+    """Integration tests for Jira API (if configured)."""
 
     @pytest.fixture
     def jira_client(self, authenticated_clients):
@@ -178,13 +178,12 @@ class TestJiraIntegration:
         except Exception as e:
             pytest.skip(f"Jira not configured or authentication failed: {e}")
 
-    def test_jira_enhanced_api_available(self, jira_client):
-        """Test that Enhanced JQL API is available."""
-        # Check that our wrapper has the enhanced_jql method
-        assert hasattr(jira_client, "enhanced_jql")
+    def test_jira_api_available(self, jira_client):
+        """Test that Jira API is available."""
+        # Check that the client has the standard jql method
         assert hasattr(jira_client, "jql")
 
-        print("✅ Jira Enhanced API methods available")
+        print("✅ Jira API methods available")
 
     def test_jira_simple_query(self, jira_client):
         """Test a simple, non-destructive Jira query."""
@@ -202,27 +201,27 @@ class TestJiraIntegration:
         except Exception as e:
             pytest.skip(f"Jira query failed: {e}")
 
-    def test_jira_enhanced_jql_direct(self, jira_client):
-        """Test direct enhanced_jql method call."""
+    def test_jira_jql_direct(self, jira_client):
+        """Test direct JQL method call."""
         try:
-            # Test direct enhanced_jql call
-            result = jira_client.enhanced_jql("order by created desc", limit=3)
+            # Test direct jql call
+            result = jira_client.jql("order by created desc", limit=3)
 
             assert isinstance(result, dict)
             assert "issues" in result
             assert "total" in result
 
-            print(f"✅ Enhanced JQL direct call successful, found {len(result.get('issues', []))} issues")
+            print(f"✅ JQL direct call successful, found {len(result.get('issues', []))} issues")
 
         except Exception as e:
-            pytest.skip(f"Enhanced JQL query failed: {e}")
+            pytest.skip(f"JQL query failed: {e}")
 
     def test_jira_query_with_fields(self, jira_client):
         """Test JQL query with specific fields."""
         try:
             # Query with specific fields
             result = jira_client.jql(
-                "order by created desc", 
+                "order by created desc",
                 limit=3,
                 fields="key,summary,status,created"
             )
@@ -239,7 +238,7 @@ class TestJiraIntegration:
                 expected_fields = {"summary", "status", "created"}
                 assert any(field in fields for field in expected_fields)
 
-            print(f"✅ Jira query with fields successful")
+            print("✅ Jira query with fields successful")
 
         except Exception as e:
             pytest.skip(f"Jira query with fields failed: {e}")
@@ -249,20 +248,20 @@ class TestJiraIntegration:
         try:
             # First, try to get any project
             result = jira_client.jql("order by created desc", limit=1)
-            
+
             if not result.get("issues"):
                 pytest.skip("No issues found to test project queries")
 
             # Get first project key from results
             first_issue = result["issues"][0]
             project_key = first_issue.get("fields", {}).get("project", {}).get("key")
-            
+
             if not project_key:
                 pytest.skip("No project key found in issue data")
 
             # Query specific project
             project_result = jira_client.jql(f"project = {project_key}", limit=5)
-            
+
             assert isinstance(project_result, dict)
             assert "issues" in project_result
 

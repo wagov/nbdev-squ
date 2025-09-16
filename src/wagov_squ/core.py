@@ -69,31 +69,41 @@ def _cli(cmd: list[str], capture_output=True):
 def load_config(
     path=None,  # Path to read json config into cache from
 ):
-    config = benedict()
+    """Load configuration with Pydantic validation while maintaining backward compatibility."""
+    import json
+
+    from .settings import create_settings_from_dict, create_settings_from_env
+
+    # If path provided, load from file (for testing/local dev)
     if path:
-        config = benedict(path.read_text(), format="json")
+        data = json.loads(path.read_text())
+        return create_settings_from_dict(data)
+
     try:
         # Configure Azure CLI for seamless extension handling
-        _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])  
+        _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
         _cli(["config", "set", "extension.dynamic_install_allow_preview=true"])
-        config = benedict(
-            _cli(
-                [
-                    "keyvault",
-                    "secret",
-                    "show",
-                    "--vault-name",
-                    cache["vault_name"],
-                    "--name",
-                    f"squconfig-{cache['tenant_id']}",
-                ]
-            ).value,
-            format="json",
-        )
+
+        # Load from Key Vault
+        vault_data = _cli(
+            [
+                "keyvault",
+                "secret",
+                "show",
+                "--vault-name",
+                cache["vault_name"],
+                "--name",
+                f"squconfig-{cache['tenant_id']}",
+            ]
+        ).value
+
+        data = json.loads(vault_data)
+        return create_settings_from_dict(data)
+
     except subprocess.CalledProcessError:
         cache.delete("logged_in")  # clear the logged in state
-    config.standardize()
-    return config
+        # Fallback to environment variables
+        return create_settings_from_env()
 
 
 def login(
@@ -106,7 +116,9 @@ def login(
         _cli(["account", "show"])
         if tenant:
             tenant_visible = len(_cli(["account", "list"]).search(tenant)) > 0
-            assert tenant_visible > 0
+            if not tenant_visible:
+                from .exceptions import AuthenticationError
+                raise AuthenticationError(f"Tenant {tenant} not visible in authenticated account list")
         cache.set("logged_in", True, 60 * 60 * 3)  # cache login state for 3 hrs
     except Exception:
         cache.delete("logged_in")
@@ -131,7 +143,9 @@ def login(
             )
             if tenant:
                 tenant_visible = len(_cli(["account", "list"]).search(tenant)) > 0
-                assert tenant_visible > 0
+                if not tenant_visible:
+                    from .exceptions import AuthenticationError
+                    raise AuthenticationError(f"Tenant {tenant} not accessible after authentication attempt")
         except Exception:
             # If managed identity unavailable, fall back on a manual login
             if tenant:
