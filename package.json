@@ -6,6 +6,6 @@
     "esbuild": "^0.25.8"
   },
   "scripts": {
-    "build": "esbuild atlaskit-transformer.js --bundle --platform=node --outfile=nbdev_squ/atlaskit-transformer.bundle.js"
+    "build": "esbuild atlaskit-transformer.js --bundle --platform=node --outfile=src/nbdev_squ/atlaskit-transformer.bundle.js"
   }
 }

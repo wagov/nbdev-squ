@@ -1,9 +1,0 @@
-project:
-  output-dir: _docs
-
-website:
-  title: "nbdev-squ"
-  site-url: "https://wagov.github.io/nbdev-squ"
-  description: "Python SIEM Query Utils nbdev edition"
-  repo-branch: main
-  repo-url: "https://github.com/wagov/nbdev-squ"

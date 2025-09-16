@@ -1,12 +1,12 @@
+# Build outputs
 _docs/
 _proc/
 node_modules/
+dist/
+build/
 *.bundle.js
 
-*.bak
-.gitattributes
-.last_checked
-.gitconfig
+# Temporary files  
 *.bak
 *.log
 *~
@@ -14,7 +14,9 @@ node_modules/
 _tmp*
 tmp*
 tags
-*.pkg
+
+# UV/Python package management
+.venv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -27,9 +29,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -100,8 +100,7 @@ celerybeat-schedule
 # dotenv
 .env
 
-# virtualenv
-.venv
+# virtualenv  
 venv/
 ENV/
 

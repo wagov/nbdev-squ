@@ -1,28 +1,65 @@
-# Install project to edit locally
+# Install project in development mode with uv
 install:
-    pip install nbdev ipython==8.32.0
-    pip install -e .  # get current project in dev mode
-    quarto --version || nbdev_install
-    npx -y npm-check-updates -u  # convenient way to freshen package.json on each release
+    uv sync --dev
     npm install
     npm run build
-    nbdev_clean
-    nbdev_export
-    nbdev_readme
-    nbdev_docs
+    @echo "✅ Development environment ready!"
 
-# Bump version ready for a release
-bump_version: install
-    nbdev_bump_version
+# Run tests
+test:
+    uv run pytest -s --tb=short
 
-# Build wheels for pypi
-build: install
-    npm ci
-    npm run build
-    pip install build==1.2.2
-    python -m build
+# Run tests with coverage  
+test-cov:
+    uv run pytest --cov=src/nbdev_squ --cov-report=term-missing --cov-report=html
 
-# Upload releases to pypi
-release-pypi:
-    pip install twine
-    twine upload --skip-existing dist/*
+# Run fast tests only (skip slow/integration tests)
+test-fast:
+    uv run pytest -m "not slow and not integration"
+
+# Run integration tests (requires SQU_CONFIG environment variable)
+test-integration:
+    uv run pytest -m integration -v -s --tb=short
+
+# Lint and format code
+lint:
+    uv run ruff check src/ tests/
+    uv run ruff format src/ tests/
+
+# Type check
+typecheck:
+    uv run mypy src/
+
+# Run all quality checks
+check: lint typecheck test
+
+# Build package
+build: 
+    npm run build  # Build JS bundle first
+    uv build
+
+# Bump version and create release
+release version:
+    # Update version in pyproject.toml
+    sed -i 's/version = "[^"]*"/version = "{{version}}"/' pyproject.toml
+    # Update version in __init__.py  
+    sed -i 's/__version__ = "[^"]*"/__version__ = "{{version}}"/' src/nbdev_squ/__init__.py
+    uv build
+    git add -A
+    git commit -m "Release v{{version}}"
+    git tag "v{{version}}"
+    @echo "✅ Ready to publish with: uv publish"
+
+# Publish to PyPI
+publish:
+    uv publish
+
+# Analyze code complexity with scc
+complexity:
+    scc --by-file .
+
+# Clean build artifacts
+clean:
+    rm -rf dist/ build/ *.egg-info/ .coverage htmlcov/
+    find . -type d -name __pycache__ -delete
+    find . -type f -name "*.pyc" -delete

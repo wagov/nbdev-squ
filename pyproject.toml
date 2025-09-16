@@ -1,0 +1,98 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wagov-squ"
+version = "1.4.0"
+description = "Python SIEM Query Utils with Ibis support"
+authors = [{name = "Adon Metcalfe", email = "adonm@fastmail.fm"}]
+license = {text = "Apache-2.0"}
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+keywords = ["siem", "security", "azure", "sentinel", "query", "automation"]
+
+dependencies = [
+    "tenacity",
+    "platformdirs",
+    "universal-pathlib",
+    "adlfs",
+    "diskcache",
+    "azure-cli>=2.70",
+    "azure-monitor-query",
+    "azure-kusto-data",
+    "atlassian-python-api",
+    "abuseipdb-wrapper",
+    "pysigma",
+    "pandas",
+    "dbt-duckdb",
+    "python-benedict",
+    "markdown",
+    "pytenable",
+    "httpx",
+    "msticpy[azsentinel]",
+    "ibis-framework[duckdb]>=9.0",
+    "duckdb>=0.10",
+    "pip>=25.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff",
+    "mypy", 
+    "pre-commit",
+]
+
+[project.urls]
+Homepage = "https://github.com/wagov/nbdev-squ"
+Documentation = "https://wagov.github.io/nbdev-squ"
+Repository = "https://github.com/wagov/nbdev-squ"
+Issues = "https://github.com/wagov/nbdev-squ/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wagov_squ", "src/nbdev_squ"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src"]
+exclude = ["src/nbdev_squ"]  # Don't lint compatibility module
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]  # Line too long (handled by formatter)
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["src.wagov_squ"]
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "--cov=src/wagov_squ --cov-report=term-missing"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests requiring Azure configuration"
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.1",
+    "pre-commit>=4.3.0",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.13.0",
+]
