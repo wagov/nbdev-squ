@@ -25,7 +25,7 @@ dependencies = [
     "universal-pathlib",
     "adlfs",
     "diskcache",
-    "azure-cli>=2.70",
+    "azure-cli>=2.77",
     "azure-monitor-query",
     "azure-kusto-data",
     "atlassian-python-api",
@@ -38,8 +38,8 @@ dependencies = [
     "pytenable",
     "httpx",
     "msticpy[azsentinel]",
-    "ibis-framework[duckdb]>=9.0",
-    "duckdb>=0.10",
+    "ibis-framework[duckdb]",
+    "duckdb",
     "pip>=25.2",
 ]
 

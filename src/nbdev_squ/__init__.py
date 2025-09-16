@@ -3,13 +3,9 @@ Compatibility module for backwards compatibility.
 This allows existing code to continue using 'from nbdev_squ import ...'
 """
 
+import sys
 import warnings
-
-# Import everything from the new wagov_squ module
-from wagov_squ import *  # noqa: F403, F401
-
-# Import submodules to make them available
-from wagov_squ import api, core, legacy  # noqa: F401
+import wagov_squ
 
 # Issue a deprecation warning
 warnings.warn(
@@ -18,3 +14,6 @@ warnings.warn(
     DeprecationWarning,
     stacklevel=2
 )
+
+# Make nbdev_squ act as an alias to wagov_squ
+sys.modules[__name__] = wagov_squ
