@@ -86,6 +86,74 @@ result = filtered.to_pandas()  # Convert back to pandas when needed
 - `Fmt.list` or `"list"` - List of lists  
 - `Fmt.ibis` or `"ibis"` - Ibis expression for advanced processing
 
+## Integration with dbt & SQLMesh
+
+### dbt Integration
+
+wagov-squ includes a built-in dbt-duckdb plugin for seamless integration. Configure your dbt `profiles.yml`:
+
+```yaml
+your_project:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'dbt.duckdb'
+      plugins:
+        - module: 'wagov_squ.api'
+          alias: 'squ'
+```
+
+Then use in your dbt models:
+
+```sql
+-- models/security/persistence_hunting.sql
+{{ config(materialized='view') }}
+
+SELECT * FROM (
+  SELECT * FROM squ(kql_path='queries/persistence_detection.kql', timespan='14d')
+)
+```
+
+Create `queries/persistence_detection.kql`:
+```kql
+DeviceProcessEvents
+| where ActionType == "ProcessCreated" 
+| where ProcessCommandLine has_all (dynamic(['reg',' ADD', @'Software\Microsoft\Windows\CurrentVersion\Run']))
+| where InitiatingProcessFileName !in (dynamic(['Discord.exe','Skype.exe']))
+| project Timestamp, DeviceName, ProcessCommandLine, InitiatingProcessFileName
+```
+
+Or query workspaces directly:
+```sql
+SELECT * FROM squ(list_workspaces=true)
+```
+
+### SQLMesh Integration
+
+```python
+# models/security_events.py
+from sqlmesh import model
+from wagov_squ import query_all, Fmt
+
+@model(
+    "security.persistence_events",
+    kind="view",
+    cron="@daily"
+)
+def persistence_events(context):
+    kql_query = """
+    DeviceProcessEvents
+    | where ActionType == "ProcessCreated"
+    | where ProcessCommandLine contains "reg add"
+    | project Timestamp, DeviceName, ProcessCommandLine
+    """
+    
+    # Get data as Ibis expression for further processing
+    data = query_all(kql_query, fmt=Fmt.ibis)
+    return data.filter(data.Timestamp >= context.start_date)
+```
+
 ## Security Considerations
 
 Configuration secrets are cached securely in the [user_cache_dir](https://platformdirs.readthedocs.io/en/latest/api.html#cache-directory) with restricted permissions. Ensure:

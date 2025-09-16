@@ -50,13 +50,12 @@ release version:
     git tag "v{{version}}"
     @echo "✅ Ready to publish with: uv publish"
 
-# Publish to PyPI
-publish:
-    uv publish
+
 
 # Analyze code complexity with scc
 complexity:
     scc --by-file .
+
 
 # Clean build artifacts
 clean:
