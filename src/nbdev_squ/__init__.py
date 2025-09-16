@@ -8,6 +8,9 @@ import warnings
 # Import everything from the new wagov_squ module
 from wagov_squ import *  # noqa: F403, F401
 
+# Import submodules to make them available
+from wagov_squ import api, core, legacy  # noqa: F401
+
 # Issue a deprecation warning
 warnings.warn(
     "The 'nbdev_squ' import name is deprecated. Please use 'wagov_squ' instead. "
