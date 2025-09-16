@@ -20,3 +20,9 @@
 - pytest with `@pytest.mark.integration` for external dependencies  
 - Import order: stdlib, third-party, local
 - Use library solutions over custom implementations
+
+## Error Handling Philosophy
+- **Trust well-maintained libraries** - let them handle their own errors naturally
+- **Minimal defensive coding** - only validate what's essential for business logic
+- **Avoid complex mocking** - prefer simple, focused tests that use real library interfaces
+- **Simple > Complex** - when debugging issues, first check basic usage (field names, parameters) before adding elaborate error handling

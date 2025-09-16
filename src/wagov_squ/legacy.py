@@ -56,41 +56,45 @@ def export_jira_issues():
     jira_issues_path = api.datalake_path() / "jira_outputs" / "issues"
 
     def getissues(start_at, jql):
-        # Standard Jira JQL query
+        # Simple Jira JQL query - let the library handle errors naturally
         response = api.clients.jira.jql(jql, start=start_at, limit=100)
+        
+        # Basic validation - trust the library for error handling
+        if not response or not isinstance(response, dict):
+            raise ValueError(f"Invalid response from Jira: {type(response)}")
+            
         next_start = response["startAt"] + response["maxResults"]
         total_rows = response["total"]
         if next_start > total_rows:
             next_start = total_rows
-        issues = response["issues"]
-        return next_start, total_rows, issues
+            
+        return next_start, total_rows, response["issues"]
 
     def save_date_issues(after_date: pandas.Timestamp, path=jira_issues_path):
         fromdate = after_date
-        todate = after_date + pandas.to_timedelta("1d")
-        jql = f"updated >= {fromdate.date().isoformat()} and updated < {todate.date().isoformat()} order by key"
+        jql = f"updated >= {fromdate.date().isoformat()} and updated < {(fromdate + pandas.to_timedelta('1d')).date().isoformat()} order by key"
         output = path / f"{fromdate.date().isoformat()}" / "issues.parquet"
+        
         if output.exists() and fromdate < pandas.Timestamp.now() - pandas.to_timedelta("1d"):
-            # skip previously dumped days except for last day
-            return None
+            return None  # Skip previously dumped days except for last day
+        
         start_at, total_rows = 0, -1
         dataframes = []
+        
         while start_at != total_rows:
             start_at, total_rows, issues = getissues(start_at, jql)
-            dataframes.append(pandas.DataFrame(issues))
-            if start_at == 100:
-                logger.info(f"{total_rows} to load")
-        if total_rows > 1:
-            df = pandas.concat(dataframes)
+            if issues:
+                dataframes.append(pandas.DataFrame(issues))
+            if start_at == 100:  # Log progress after first batch
+                logger.info(f"{total_rows} total issues to load for {fromdate.date()}")
+        
+        if dataframes:
+            df = pandas.concat(dataframes, ignore_index=True)
             df["fields"] = df["fields"].apply(json.dumps)
-            logger.info(f"saving {output}")
-            try:
-                df.to_parquet(output.open("wb"))
-            except Exception as exc:
-                print(exc)
+            output.parent.mkdir(parents=True, exist_ok=True)
+            df.to_parquet(output)
             return df
-        else:
-            return None
+        return None
 
     after = pandas.Timestamp.now() - pandas.to_timedelta("7d")
     until = pandas.Timestamp.now() + pandas.to_timedelta("1d")
