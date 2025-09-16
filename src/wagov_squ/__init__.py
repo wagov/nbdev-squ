@@ -1,6 +1,6 @@
 """nbdev-squ - Python SIEM Query Utils with Ibis support."""
 
-__version__ = "1.4.4"
+__version__ = "1.4.5"
 
 # Import main API components
 from .api import Fmt, clients, list_securityinsights, list_workspaces, query_all
