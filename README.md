@@ -2,7 +2,7 @@
 
 Python SIEM Query Utils with Ibis support for scalable data processing.
 
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/wagov/nbdev-squ/release.yaml.svg?logo=github)](https://github.com/wagov/nbdev-squ/actions/workflows/release.yaml)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/wagov/nbdev-squ/release.yml.svg?logo=github)](https://github.com/wagov/nbdev-squ/actions/workflows/release.yml)
 [![PyPI Version](https://img.shields.io/pypi/v/wagov-squ.svg?logo=pypi)](https://pypi.org/project/wagov-squ/)
 
 ## Features
@@ -10,7 +10,6 @@ Python SIEM Query Utils with Ibis support for scalable data processing.
 - **Azure Sentinel Integration**: Query Log Analytics workspaces with KQL
 - **Multiple Output Formats**: Support for pandas DataFrame, CSV, JSON, list, and Ibis expressions  
 - **Scalable Processing**: Built on Ibis for efficient data transformations
-- **Backward Compatible**: Zero breaking changes for existing code
 - **Modern Architecture**: Built on uv for fast dependency management
 
 ## Install
