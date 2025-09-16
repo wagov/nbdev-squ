@@ -2,9 +2,8 @@
 
 Python SIEM Query Utils with Ibis support for scalable data processing.
 
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/wagov/nbdev-squ/deploy.yaml.svg?logo=github)](https://github.com/wagov/nbdev-squ/actions/workflows/deploy.yaml)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/wagov/nbdev-squ/release.yaml.svg?logo=github)](https://github.com/wagov/nbdev-squ/actions/workflows/release.yaml)
 [![PyPI Version](https://img.shields.io/pypi/v/wagov-squ.svg?logo=pypi)](https://pypi.org/project/wagov-squ/)
-[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/wagov/nbdev-squ.svg?label=openssf%20scorecard)](https://securityscorecards.dev/viewer/?uri=github.com/wagov/nbdev-squ)
 
 ## Features
 
