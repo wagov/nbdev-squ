@@ -1,4 +1,8 @@
-# Install project in development mode with uv
+# List available commands
+default:
+    @just --list
+
+# Install project in development mode
 install:
     uv sync --dev
     npm install
@@ -38,17 +42,30 @@ build:
     npm run build  # Build JS bundle first
     uv build
 
-# Bump version and create release
-release version:
-    # Update version in pyproject.toml
-    sed -i 's/version = "[^"]*"/version = "{{version}}"/' pyproject.toml
-    # Update version in __init__.py  
-    sed -i 's/__version__ = "[^"]*"/__version__ = "{{version}}"/' src/nbdev_squ/__init__.py
-    uv build
-    git add -A
-    git commit -m "Release v{{version}}"
-    git tag "v{{version}}"
-    @echo "✅ Ready to publish with: uv publish"
+# Create release from current version (use 'just bump patch' first)  
+release:
+    #!/usr/bin/env bash
+    just build
+    export VERSION=$(grep '__version__ = ' src/wagov_squ/__init__.py | cut -d'"' -f2)
+    git add -A && git commit -m "Release v$VERSION" && git tag "v$VERSION"
+    echo "✅ Ready to push with: git push && git push --tags"
+    echo "GitHub Actions will automatically publish to PyPI"
+
+# Quick version bumps (patch/minor/major)
+bump type:
+    #!/usr/bin/env python3
+    import re, sys
+    with open('src/wagov_squ/__init__.py', 'r') as f: content = f.read()
+    match = re.search(r'__version__ = "(\d+)\.(\d+)\.(\d+)"', content)
+    if not match: sys.exit("Could not find version")
+    major, minor, patch = map(int, match.groups())
+    if "{{type}}" == "patch": new = f"{major}.{minor}.{patch+1}"
+    elif "{{type}}" == "minor": new = f"{major}.{minor+1}.0"  
+    elif "{{type}}" == "major": new = f"{major+1}.0.0"
+    else: sys.exit("Use: just bump patch|minor|major")
+    with open('src/wagov_squ/__init__.py', 'w') as f:
+        f.write(re.sub(r'__version__ = "[^"]*"', f'__version__ = "{new}"', content))
+    print(f"Bumped version to {new}")
 
 
 

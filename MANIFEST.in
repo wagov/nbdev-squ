@@ -1,6 +1,4 @@
-include settings.ini
 include LICENSE
-include CONTRIBUTING.md
 include README.md
-include nbdev_squ/atlaskit-transformer.bundle.js
+include src/nbdev_squ/atlaskit-transformer.bundle.js
 recursive-exclude * __pycache__
