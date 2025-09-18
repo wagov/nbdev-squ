@@ -18,6 +18,7 @@ import logging
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import httpx
 import pandas
@@ -80,9 +81,28 @@ def load_config(
         return create_settings_from_dict(data)
 
     try:
-        # Configure Azure CLI for seamless extension handling
-        _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
-        _cli(["config", "set", "extension.dynamic_install_allow_preview=true"])
+        # Configure Azure CLI for seamless extension handling - only set if needed
+        try:
+            config = _cli(["config", "get"])
+            needs_update = (
+                config.get("extension", {}).get("use_dynamic_install") != "yes_without_prompt" or
+                config.get("extension", {}).get("dynamic_install_allow_preview") != "true"
+            )
+            if needs_update:
+                _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
+                _cli(["config", "set", "extension.dynamic_install_allow_preview=true"])
+        except subprocess.CalledProcessError:
+            # Reset corrupted config - try CLI first, fallback to file removal
+            try:
+                subprocess.run([sys.executable, "-m", "azure.cli", "config", "delete", "--all"], check=True)
+            except subprocess.CalledProcessError:
+                # If CLI can't start due to corruption, remove config files directly
+                azure_config = Path.home() / ".azure"
+                if azure_config.exists():
+                    import shutil
+                    shutil.rmtree(azure_config)
+            _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
+            _cli(["config", "set", "extension.dynamic_install_allow_preview=true"])
 
         # Load from Key Vault
         vault_data = _cli(
