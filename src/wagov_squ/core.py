@@ -81,12 +81,14 @@ def load_config(
         return create_settings_from_dict(data)
 
     try:
-        # Configure Azure CLI for seamless extension handling - only set if needed
+        # Configure Azure CLI for extension handling - only set if needed
         try:
             config = _cli(["config", "get"])
+            # Parse config structure: {extension: [{name: "setting", value: "val"}]}
+            ext_settings = {item["name"]: item["value"] for item in config.get("extension", [])}
             needs_update = (
-                config.get("extension", {}).get("use_dynamic_install") != "yes_without_prompt" or
-                config.get("extension", {}).get("dynamic_install_allow_preview") != "true"
+                ext_settings.get("use_dynamic_install") != "yes_without_prompt" or
+                ext_settings.get("dynamic_install_allow_preview") != "true"
             )
             if needs_update:
                 _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
