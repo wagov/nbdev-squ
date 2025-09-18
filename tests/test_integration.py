@@ -171,12 +171,10 @@ class TestJiraIntegration:
     @pytest.fixture
     def jira_client(self, authenticated_clients):
         """Get Jira client if configured."""
-        try:
-            clients = authenticated_clients
-            jira = clients.jira
-            return jira
-        except Exception as e:
-            pytest.skip(f"Jira not configured or authentication failed: {e}")
+        clients = authenticated_clients
+        if not hasattr(clients, 'jira') or clients.jira is None:
+            pytest.skip("Jira client not configured")
+        return clients.jira
 
     def test_jira_api_available(self, jira_client):
         """Test that Jira API is available."""
@@ -187,41 +185,35 @@ class TestJiraIntegration:
 
     def test_jira_simple_query(self, jira_client):
         """Test a simple, non-destructive Jira query."""
-        try:
-            # Simple query to get a few issues (read-only)
-            result = jira_client.jql("order by created desc", limit=5)
+        # Simple query to get a few issues (read-only) with date bounds
+        result = jira_client.jql("created >= -30d order by created desc", limit=5)
 
-            # Should return a dict with issues
-            assert isinstance(result, dict)
-            assert "issues" in result
-            assert "total" in result
+        # Should return a dict with issues
+        assert isinstance(result, dict)
+        # Check for either 'issues' or 'values' key (different Jira API versions)
+        issues_key = "issues" if "issues" in result else "values"
+        assert issues_key in result, f"Response keys: {list(result.keys())}"
 
-            print(f"✅ Jira query successful, found {len(result.get('issues', []))} issues")
-
-        except Exception as e:
-            pytest.skip(f"Jira query failed: {e}")
+        print(f"✅ Jira query successful, found {len(result.get(issues_key, []))} issues")
 
     def test_jira_jql_direct(self, jira_client):
         """Test direct JQL method call."""
-        try:
-            # Test direct jql call
-            result = jira_client.jql("order by created desc", limit=3)
+        # Test direct jql call with date bounds
+        result = jira_client.jql("created >= -7d order by created desc", limit=3)
 
-            assert isinstance(result, dict)
-            assert "issues" in result
-            assert "total" in result
+        assert isinstance(result, dict)
+        # Check for either 'issues' or 'values' key (different Jira API versions)
+        issues_key = "issues" if "issues" in result else "values"
+        assert issues_key in result, f"Response keys: {list(result.keys())}"
 
-            print(f"✅ JQL direct call successful, found {len(result.get('issues', []))} issues")
-
-        except Exception as e:
-            pytest.skip(f"JQL query failed: {e}")
+        print(f"✅ JQL direct call successful, found {len(result.get(issues_key, []))} issues")
 
     def test_jira_query_with_fields(self, jira_client):
         """Test JQL query with specific fields."""
         try:
-            # Query with specific fields
+            # Query with specific fields and date bounds
             result = jira_client.jql(
-                "order by created desc",
+                "created >= -14d order by created desc",
                 limit=3,
                 fields="key,summary,status,created"
             )
@@ -246,8 +238,8 @@ class TestJiraIntegration:
     def test_jira_project_query(self, jira_client):
         """Test JQL query for a specific project (if any exist)."""
         try:
-            # First, try to get any project
-            result = jira_client.jql("order by created desc", limit=1)
+            # First, try to get any project with date bounds
+            result = jira_client.jql("created >= -30d order by created desc", limit=1)
 
             if not result.get("issues"):
                 pytest.skip("No issues found to test project queries")
