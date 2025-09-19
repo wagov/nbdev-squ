@@ -43,6 +43,7 @@ dependencies = [
     "pip>=25.2",
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
+    "semver>=3.0.4",
 ]
 
 [project.optional-dependencies]

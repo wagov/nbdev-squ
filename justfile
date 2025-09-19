@@ -9,21 +9,15 @@ install:
     npm run build
     @echo "✅ Development environment ready!"
 
-# Run tests
-test:
-    uv run pytest -s --tb=short
-
-# Run tests with coverage  
-test-cov:
-    uv run pytest --cov=src/nbdev_squ --cov-report=term-missing --cov-report=html
-
-# Run fast tests only (skip slow/integration tests)
-test-fast:
-    uv run pytest -m "not slow and not integration"
-
-# Run integration tests (requires SQU_CONFIG environment variable)
-test-integration:
-    uv run pytest -m integration -v -s --tb=short
+# Run tests (fast, integration, or with coverage)
+test type="fast":
+    #!/usr/bin/env bash
+    case "{{type}}" in
+        fast) uv run pytest -m "not slow and not integration" ;;
+        integration) uv run pytest -m integration -v -s --tb=short ;;
+        cov) uv run pytest --cov=src/nbdev_squ --cov-report=term-missing --cov-report=html ;;
+        *) uv run pytest -s --tb=short ;;
+    esac
 
 # Lint and format code
 lint:
@@ -34,8 +28,9 @@ lint:
 typecheck:
     uv run mypy src/
 
-# Run all quality checks
-check: lint typecheck test
+# Run all quality checks  
+check: lint typecheck
+    just test
 
 # Build package
 build: 
@@ -43,48 +38,32 @@ build:
     uv build
 
 # Create release from current version (use 'just bump patch' first)  
-release message="":
+release message="" push="true":
     #!/usr/bin/env bash
     just build
-    VERSION=$(grep '__version__ = ' src/wagov_squ/__init__.py | cut -d'"' -f2)
-    echo "Creating release for version v$VERSION"
-    if [ "{{message}}" = "" ]; then
-        COMMIT_MSG="Release v$VERSION"
-    else
-        COMMIT_MSG="{{message}}"
-    fi
-    git add -A && git commit -m "$COMMIT_MSG" && git tag "v$VERSION"
-    echo "✅ Ready to push with: git push && git push --tags"
-    echo "GitHub Actions will automatically publish to PyPI"
+    VERSION=$(uv run python -c "import wagov_squ; print(wagov_squ.__version__)")
+    MSG="{{message}}"
+    [ -z "$MSG" ] && MSG="Release v$VERSION"
+    git add -A && git commit -m "$MSG" && git tag -f "v$VERSION"
+    [ "{{push}}" = "true" ] && git push && git push --tags -f || echo "Ready to push: git push && git push --tags"
 
 # Quick version bumps (patch/minor/major)
 bump type:
-    #!/usr/bin/env python3
-    import re, sys
-    with open('src/wagov_squ/__init__.py', 'r') as f: content = f.read()
-    match = re.search(r'__version__ = "(\d+)\.(\d+)\.(\d+)"', content)
-    if not match: sys.exit("Could not find version")
-    major, minor, patch = map(int, match.groups())
-    if "{{type}}" == "patch": new = f"{major}.{minor}.{patch+1}"
-    elif "{{type}}" == "minor": new = f"{major}.{minor+1}.0"  
-    elif "{{type}}" == "major": new = f"{major+1}.0.0"
-    else: sys.exit("Use: just bump patch|minor|major")
-    with open('src/wagov_squ/__init__.py', 'w') as f:
-        f.write(re.sub(r'__version__ = "[^"]*"', f'__version__ = "{new}"', content))
-    print(f"Bumped version to {new}")
+    #!/usr/bin/env bash
+    NEW=$(uv run python -c "import wagov_squ, semver; print(getattr(semver.VersionInfo.parse(wagov_squ.__version__), 'bump_{{type}}')())")
+    sed -i "s/__version__ = \".*\"/__version__ = \"$NEW\"/" src/wagov_squ/__init__.py
+    echo "__version__ = \"$NEW\""
 
 
 
-# Analyze code complexity with scc
-complexity:
-    scc --by-file .
-
-
-# Clean build artifacts
+# Clean build artifacts and analyze complexity  
 clean:
-    rm -rf dist/ build/ *.egg-info/ .coverage htmlcov/
+    rm -rf dist/ build/ *.egg-info/ .coverage htmlcov/ node_modules/
     find . -type d -name __pycache__ -delete
     find . -type f -name "*.pyc" -delete
+
+complexity:
+    scc --by-file .
 
 # Test Jira export with configurable options
 test-jira days="7" batch_size="100" dry_run="true" force_refresh="false" include_today="false":

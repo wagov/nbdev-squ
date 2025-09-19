@@ -5058,6 +5058,7 @@ dependencies = [
     { name = "pysigma" },
     { name = "pytenable" },
     { name = "python-benedict" },
+    { name = "semver" },
     { name = "tenacity" },
     { name = "universal-pathlib" },
 ]
@@ -5099,6 +5100,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "python-benedict" },
     { name = "ruff", marker = "extra == 'dev'" },
+    { name = "semver", specifier = ">=3.0.4" },
     { name = "tenacity" },
     { name = "universal-pathlib" },
 ]

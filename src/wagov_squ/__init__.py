@@ -2,7 +2,7 @@
 
 import logging
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 
 # Configure default logging if not already configured
 if not logging.getLogger().handlers:
