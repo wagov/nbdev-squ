@@ -85,3 +85,8 @@ clean:
     rm -rf dist/ build/ *.egg-info/ .coverage htmlcov/
     find . -type d -name __pycache__ -delete
     find . -type f -name "*.pyc" -delete
+
+# Test Jira export with configurable options
+test-jira days="7" batch_size="100" dry_run="true" force_refresh="false" include_today="false":
+    uv run az account set --subscription "DGov Sentinel"
+    uv run python -c "from wagov_squ.legacy import export_jira_issues; export_jira_issues(days_to_export={{ days }}, batch_size={{ batch_size }}, dry_run={{ dry_run }}, force_refresh={{ force_refresh }}, include_today={{ include_today }})"

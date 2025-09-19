@@ -1,6 +1,16 @@
 """nbdev-squ - Python SIEM Query Utils with Ibis support."""
 
-__version__ = "1.4.9"
+import logging
+
+__version__ = "1.5.0"
+
+# Configure default logging if not already configured
+if not logging.getLogger().handlers:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
 
 # Import main API components
 from .api import Fmt, clients, list_securityinsights, list_workspaces, query_all
