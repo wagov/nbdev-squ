@@ -49,9 +49,12 @@ def adxtable2df(table):
     return frame
 
 
-def export_jira_issues():
+def export_jira_issues(dry_run=False):
     """
     Exports all JIRA issues to the data lake.
+    
+    Args:
+        dry_run (bool): If True, fetch data but don't write to datalake
     """
     jira_issues_path = api.datalake_path() / "jira_outputs" / "issues"
 
@@ -62,20 +65,38 @@ def export_jira_issues():
         # Basic validation - trust the library for error handling
         if not response or not isinstance(response, dict):
             raise ValueError(f"Invalid response from Jira: {type(response)}")
+        
+        # Handle different response formats (standard vs. modern API)
+        if "startAt" in response and "maxResults" in response:
+            # Standard Jira API format
+            next_start = response["startAt"] + response["maxResults"]
+            total_rows = response["total"]
+            issues = response["issues"]
+        elif "nextPageToken" in response:
+            # Modern paginated API format
+            next_start = start_at + 100  # Increment by limit
+            total_rows = response.get("total", len(response.get("issues", [])))
+            issues = response["issues"]
+            # If there's no nextPageToken, we're at the end
+            if not response.get("nextPageToken"):
+                next_start = total_rows
+        else:
+            # Fallback - assume single page response
+            issues = response.get("issues", response.get("values", []))
+            total_rows = len(issues)
+            next_start = total_rows
             
-        next_start = response["startAt"] + response["maxResults"]
-        total_rows = response["total"]
         if next_start > total_rows:
             next_start = total_rows
             
-        return next_start, total_rows, response["issues"]
+        return next_start, total_rows, issues
 
-    def save_date_issues(after_date: pandas.Timestamp, path=jira_issues_path):
+    def save_date_issues(after_date: pandas.Timestamp, path=jira_issues_path, dry_run=False):
         fromdate = after_date
         jql = f"updated >= {fromdate.date().isoformat()} and updated < {(fromdate + pandas.to_timedelta('1d')).date().isoformat()} order by key"
         output = path / f"{fromdate.date().isoformat()}" / "issues.parquet"
         
-        if output.exists() and fromdate < pandas.Timestamp.now() - pandas.to_timedelta("1d"):
+        if not dry_run and output.exists() and fromdate < pandas.Timestamp.now() - pandas.to_timedelta("1d"):
             return None  # Skip previously dumped days except for last day
         
         start_at, total_rows = 0, -1
@@ -91,8 +112,9 @@ def export_jira_issues():
         if dataframes:
             df = pandas.concat(dataframes, ignore_index=True)
             df["fields"] = df["fields"].apply(json.dumps)
-            output.parent.mkdir(parents=True, exist_ok=True)
-            df.to_parquet(output)
+            if not dry_run:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                df.to_parquet(output)
             return df
         return None
 
@@ -100,7 +122,7 @@ def export_jira_issues():
     until = pandas.Timestamp.now() + pandas.to_timedelta("1d")
 
     while after < until:
-        save_date_issues(after)
+        save_date_issues(after, path=jira_issues_path, dry_run=dry_run)
         after += pandas.to_timedelta("1d")
 
 

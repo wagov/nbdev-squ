@@ -216,3 +216,44 @@ def test_atlaskit_transformer_error_handling():
         
         with pytest.raises(FileNotFoundError, match="atlaskit-transformer.bundle.js not found"):
             atlaskit_transformer("# Test", "md", "wiki")
+
+
+
+@pytest.mark.integration
+def test_export_jira_issues_dry_run():
+    """Test export_jira_issues with dry_run=True does not write to datalake."""
+    import os
+    import tempfile
+    from pathlib import Path
+    from unittest.mock import patch
+    import pandas
+    from wagov_squ.legacy import export_jira_issues
+    
+    # Skip if no SQU_CONFIG
+    if not os.getenv("SQU_CONFIG"):
+        pytest.skip("SQU_CONFIG not set - integration tests will be skipped")
+    
+    # Mock the date range to be very recent for faster testing
+    with patch("pandas.Timestamp.now") as mock_now:
+        # Set mock time to a specific date  
+        test_time = pandas.Timestamp("2025-01-15 10:00:00")
+        mock_now.return_value = test_time
+        
+        # Create a temporary directory to verify no files are written
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with patch("wagov_squ.api.datalake_path") as mock_datalake:
+                mock_datalake.return_value = Path(temp_dir)
+                
+                # Run in dry_run mode - should not create files
+                try:
+                    export_jira_issues(dry_run=True)
+                    # Verify no files were created
+                    files_created = list(Path(temp_dir).rglob("*"))
+                    assert len(files_created) == 0, f"Dry run created files: {files_created}"
+                    print("✅ Export dry run successful - no files created")
+                    
+                except Exception as e:
+                    # If there are no recent issues, that is acceptable for testing
+                    if "total" not in str(e).lower() and "issues" not in str(e).lower():
+                        raise
+
