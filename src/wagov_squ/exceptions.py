@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 
-class SquException(Exception):
+class SquError(Exception):
     """Base exception for all squ-related errors."""
 
     def __init__(self, message: str, details: dict[str, Any] | None = None):
@@ -14,42 +14,49 @@ class SquException(Exception):
         self.details = details or {}
 
 
-class ConfigurationError(SquException):
+class ConfigurationError(SquError):
     """Raised when configuration is invalid or missing."""
+
     pass
 
 
-class AuthenticationError(SquException):
+class AuthenticationError(SquError):
     """Raised when authentication fails."""
+
     pass
 
 
-class AzureError(SquException):
+class AzureError(SquError):
     """Raised when Azure operations fail."""
+
     pass
 
 
-class JiraError(SquException):
+class JiraError(SquError):
     """Raised when Jira operations fail."""
+
     pass
 
 
-class QueryError(SquException):
+class QueryError(SquError):
     """Raised when KQL queries fail."""
+
     pass
 
 
-class ValidationError(SquException):
+class ValidationError(SquError):
     """Raised when data validation fails."""
+
     pass
 
 
-class ResourceError(SquException):
+class ResourceError(SquError):
     """Raised when resource management fails."""
+
     pass
 
 
-class RetryExhaustedError(SquException):
+class RetryExhaustedError(SquError):
     """Raised when all retry attempts are exhausted."""
 
     def __init__(self, message: str, attempts: int, last_error: Exception):
@@ -58,14 +65,15 @@ class RetryExhaustedError(SquException):
         self.last_error = last_error
 
 
-# Backwards compatibility aliases
 class SquConfigurationError(ConfigurationError):
     """Legacy alias for ConfigurationError."""
+
     pass
 
 
 class SquAuthenticationError(AuthenticationError):
     """Legacy alias for AuthenticationError."""
+
     pass
 
 
@@ -89,6 +97,7 @@ def validate_config_required(config: Any, field_name: str) -> Any:
 
 def require_authentication(func):
     """Decorator to ensure authentication is required for a function."""
+
     def wrapper(*args, **kwargs):
         # This could be expanded to check actual auth state
         try:
@@ -97,4 +106,5 @@ def require_authentication(func):
             if "authentication" in str(e).lower() or "login" in str(e).lower():
                 raise AuthenticationError(f"Authentication required: {e}")
             raise
+
     return wrapper

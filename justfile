@@ -43,11 +43,17 @@ build:
     uv build
 
 # Create release from current version (use 'just bump patch' first)  
-release:
+release message="":
     #!/usr/bin/env bash
     just build
-    export VERSION=$(grep '__version__ = ' src/wagov_squ/__init__.py | cut -d'"' -f2)
-    git add -A && git commit -m "Release v$VERSION" && git tag "v$VERSION"
+    VERSION=$(grep '__version__ = ' src/wagov_squ/__init__.py | cut -d'"' -f2)
+    echo "Creating release for version v$VERSION"
+    if [ "{{message}}" = "" ]; then
+        COMMIT_MSG="Release v$VERSION"
+    else
+        COMMIT_MSG="{{message}}"
+    fi
+    git add -A && git commit -m "$COMMIT_MSG" && git tag "v$VERSION"
     echo "✅ Ready to push with: git push && git push --tags"
     echo "GitHub Actions will automatically publish to PyPI"
 

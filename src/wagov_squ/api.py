@@ -47,6 +47,7 @@ from .frame import Fmt, as_pandas, format_output, memtable, read_parquet
 
 logger = logging.getLogger(__name__)
 
+
 class Clients:
     """
     Clients for various services, cached for performance
@@ -437,7 +438,7 @@ class Plugin(BasePlugin):
     def load(self, source_config: SourceConfig):
         """
         Load data based on source configuration.
-        
+
         Returns empty DataFrame for expected "no data" situations.
         Raises DbtRuntimeError for operational failures to let dbt handle transactions properly.
         """
@@ -446,29 +447,29 @@ class Plugin(BasePlugin):
                 # Load and execute KQL query from file
                 kql_path = source_config["kql_path"]
                 kql_path = kql_path.format(**source_config.as_dict())
-                
+
                 if not Path(kql_path).exists():
                     logger.info(f"KQL file not found: {kql_path}")
                     return pandas.DataFrame()
-                
+
                 query = Path(kql_path).read_text()
                 timespan = pandas.Timedelta(source_config.get("timespan", "14d"))
                 return query_all(query, timespan=timespan)
-                
+
             elif "list_workspaces" in source_config:
                 # Return workspace listing
                 return list_workspaces()
-                
+
             elif "client_api" in source_config:
                 # Call specific client API method
                 api_method = source_config["client_api"]
                 kwargs = json.loads(source_config.get("kwargs", "{}"))
-                
+
                 if not hasattr(clients, api_method):
                     raise ValueError(f"Unknown client API method: {api_method}")
-                    
+
                 api_result = getattr(clients, api_method)(**kwargs)
-                
+
                 # Ensure we return a DataFrame
                 if isinstance(api_result, pandas.DataFrame):
                     return api_result
@@ -479,7 +480,7 @@ class Plugin(BasePlugin):
                     "Invalid squ plugin configuration. Must specify one of: "
                     "kql_path, list_workspaces, or client_api"
                 )
-                
+
         except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
             # Expected "no data" or configuration issues - return empty DataFrame
             logger.info(f"No data or invalid config: {e}")
@@ -487,6 +488,7 @@ class Plugin(BasePlugin):
         except Exception as e:
             # Unexpected operational failures - let dbt handle transaction rollback properly
             from dbt.exceptions import DbtRuntimeError
+
             raise DbtRuntimeError(f"squ plugin failed for config {source_config}: {e}") from e
 
     def default_materialization(self):

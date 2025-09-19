@@ -87,8 +87,8 @@ def load_config(
             # Parse config structure: {extension: [{name: "setting", value: "val"}]}
             ext_settings = {item["name"]: item["value"] for item in config.get("extension", [])}
             needs_update = (
-                ext_settings.get("use_dynamic_install") != "yes_without_prompt" or
-                ext_settings.get("dynamic_install_allow_preview") != "true"
+                ext_settings.get("use_dynamic_install") != "yes_without_prompt"
+                or ext_settings.get("dynamic_install_allow_preview") != "true"
             )
             if needs_update:
                 _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
@@ -96,12 +96,15 @@ def load_config(
         except subprocess.CalledProcessError:
             # Reset corrupted config - try CLI first, fallback to file removal
             try:
-                subprocess.run([sys.executable, "-m", "azure.cli", "config", "delete", "--all"], check=True)
+                subprocess.run(
+                    [sys.executable, "-m", "azure.cli", "config", "delete", "--all"], check=True
+                )
             except subprocess.CalledProcessError:
                 # If CLI can't start due to corruption, remove config files directly
                 azure_config = Path.home() / ".azure"
                 if azure_config.exists():
                     import shutil
+
                     shutil.rmtree(azure_config)
             _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
             _cli(["config", "set", "extension.dynamic_install_allow_preview=true"])
@@ -140,7 +143,10 @@ def login(
             tenant_visible = len(_cli(["account", "list"]).search(tenant)) > 0
             if not tenant_visible:
                 from .exceptions import AuthenticationError
-                raise AuthenticationError(f"Tenant {tenant} not visible in authenticated account list")
+
+                raise AuthenticationError(
+                    f"Tenant {tenant} not visible in authenticated account list"
+                )
         cache.set("logged_in", True, 60 * 60 * 3)  # cache login state for 3 hrs
     except Exception:
         cache.delete("logged_in")
@@ -167,7 +173,10 @@ def login(
                 tenant_visible = len(_cli(["account", "list"]).search(tenant)) > 0
                 if not tenant_visible:
                     from .exceptions import AuthenticationError
-                    raise AuthenticationError(f"Tenant {tenant} not accessible after authentication attempt")
+
+                    raise AuthenticationError(
+                        f"Tenant {tenant} not accessible after authentication attempt"
+                    )
         except Exception:
             # If managed identity unavailable, fall back on a manual login
             if tenant:

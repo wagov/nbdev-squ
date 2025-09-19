@@ -15,36 +15,30 @@ class AzureConfig(BaseSettings):
     """Azure-specific configuration."""
 
     tenant_id: str | None = Field(
-        None,
-        description="Azure Active Directory tenant ID (GUID format)"
+        None, description="Azure Active Directory tenant ID (GUID format)"
     )
     vault_name: str | None = Field(
-        None,
-        description="Azure Key Vault name for configuration storage"
+        None, description="Azure Key Vault name for configuration storage"
     )
-    datalake_account: str | None = Field(
-        None,
-        description="Azure Data Lake Storage account URL"
-    )
+    datalake_account: str | None = Field(None, description="Azure Data Lake Storage account URL")
     datalake_container: str | None = Field(
-        None,
-        description="Azure Data Lake Storage container name"
+        None, description="Azure Data Lake Storage container name"
     )
 
-    @field_validator('tenant_id')
+    @field_validator("tenant_id")
     @classmethod
     def validate_tenant_id(cls, v: str | None) -> str | None:
         """Validate tenant ID is a valid GUID format."""
         if v is None:
             return v
         guid_pattern = re.compile(
-            r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+            r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
         )
         if not guid_pattern.match(v):
-            raise ValueError('tenant_id must be a valid GUID format')
+            raise ValueError("tenant_id must be a valid GUID format")
         return v
 
-    @field_validator('datalake_account')
+    @field_validator("datalake_account")
     @classmethod
     def validate_datalake_account(cls, v: str | None) -> str | None:
         """Validate datalake account is a valid URL."""
@@ -52,7 +46,7 @@ class AzureConfig(BaseSettings):
             return v
         parsed = urlparse(v)
         if not all([parsed.scheme, parsed.netloc]):
-            raise ValueError('datalake_account must be a valid URL')
+            raise ValueError("datalake_account must be a valid URL")
         return v
 
 
@@ -60,28 +54,23 @@ class JiraConfig(BaseSettings):
     """Jira-specific configuration."""
 
     url: str | None = Field(
-        None,
-        description="Jira instance URL (e.g., https://yourorg.atlassian.net)"
+        None, description="Jira instance URL (e.g., https://yourorg.atlassian.net)"
     )
     username: str | None = Field(
-        None,
-        description="Jira username or email address for authentication"
+        None, description="Jira username or email address for authentication"
     )
-    password: str | None = Field(
-        None,
-        description="Jira API token or password for authentication"
-    )
+    password: str | None = Field(None, description="Jira API token or password for authentication")
 
-    @field_validator('url')
+    @field_validator("url")
     @classmethod
     def validate_jira_url(cls, v: str | None) -> str | None:
         """Validate Jira URL format."""
         if v is None:
             return v
         parsed = urlparse(v)
-        if not all([parsed.scheme in ('http', 'https'), parsed.netloc]):
-            raise ValueError('Jira URL must be a valid HTTP/HTTPS URL')
-        return v.rstrip('/')  # Remove trailing slash
+        if not all([parsed.scheme in ("http", "https"), parsed.netloc]):
+            raise ValueError("Jira URL must be a valid HTTP/HTTPS URL")
+        return v.rstrip("/")  # Remove trailing slash
 
     @computed_field
     @property
@@ -99,7 +88,7 @@ class SquSettings(BaseSettings):
         env_prefix="SQU_",
         case_sensitive=False,
         extra="allow",  # Allow extra fields for backward compatibility
-        validate_default=True
+        validate_default=True,
     )
 
     # Nested configuration models
@@ -108,58 +97,50 @@ class SquSettings(BaseSettings):
 
     # Legacy flat fields for backward compatibility
     jira_url: str | None = Field(
-        None,
-        description="[DEPRECATED] Use jira.url instead. Jira instance URL"
+        None, description="[DEPRECATED] Use jira.url instead. Jira instance URL"
     )
     jira_username: str | None = Field(
-        None,
-        description="[DEPRECATED] Use jira.username instead. Jira username"
+        None, description="[DEPRECATED] Use jira.username instead. Jira username"
     )
     jira_password: str | None = Field(
-        None,
-        description="[DEPRECATED] Use jira.password instead. Jira password"
+        None, description="[DEPRECATED] Use jira.password instead. Jira password"
     )
     tenant_id: str | None = Field(
-        None,
-        description="[DEPRECATED] Use azure.tenant_id instead. Azure tenant ID"
+        None, description="[DEPRECATED] Use azure.tenant_id instead. Azure tenant ID"
     )
     vault_name: str | None = Field(
-        None,
-        description="[DEPRECATED] Use azure.vault_name instead. Azure Key Vault name"
+        None, description="[DEPRECATED] Use azure.vault_name instead. Azure Key Vault name"
     )
     datalake_account: str | None = Field(
-        None,
-        description="[DEPRECATED] Use azure.datalake_account instead. Azure Data Lake account"
+        None, description="[DEPRECATED] Use azure.datalake_account instead. Azure Data Lake account"
     )
     datalake_container: str | None = Field(
         None,
-        description="[DEPRECATED] Use azure.datalake_container instead. Azure Data Lake container"
+        description="[DEPRECATED] Use azure.datalake_container instead. Azure Data Lake container",
     )
 
     # External API settings
     runzero_apitoken: str | None = Field(
-        None,
-        description="RunZero API token for network discovery integration"
+        None, description="RunZero API token for network discovery integration"
     )
     abuseipdb_api_key: str | None = Field(
-        None,
-        description="AbuseIPDB API key for IP reputation lookups"
+        None, description="AbuseIPDB API key for IP reputation lookups"
     )
     tenable_access_key: str | None = Field(
-        None,
-        description="Tenable.io access key for vulnerability data"
+        None, description="Tenable.io access key for vulnerability data"
     )
     tenable_secret_key: str | None = Field(
-        None,
-        description="Tenable.io secret key for vulnerability data"
+        None, description="Tenable.io secret key for vulnerability data"
     )
 
-    @field_validator('runzero_apitoken', 'abuseipdb_api_key', 'tenable_access_key', 'tenable_secret_key')
+    @field_validator(
+        "runzero_apitoken", "abuseipdb_api_key", "tenable_access_key", "tenable_secret_key"
+    )
     @classmethod
     def validate_api_keys(cls, v: str | None) -> str | None:
         """Validate API keys are not empty strings."""
-        if v is not None and v.strip() == '':
-            raise ValueError('API keys cannot be empty strings')
+        if v is not None and v.strip() == "":
+            raise ValueError("API keys cannot be empty strings")
         return v
 
     def model_post_init(self, __context: Any) -> None:
@@ -193,16 +174,16 @@ class LegacyConfigWrapper:
     def __getattr__(self, name: str):
         """Provide dot notation access like benedict."""
         # Avoid recursion by checking internal attributes first
-        if name.startswith('_'):
+        if name.startswith("_"):
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
 
         # Check the dict first to avoid potential recursion
-        if hasattr(self, '_dict') and name in self._dict:
+        if hasattr(self, "_dict") and name in self._dict:
             return self._dict[name]
 
         # Check the Pydantic settings if available
-        if hasattr(self, '_settings'):
-            settings_dict = object.__getattribute__(self._settings, '__dict__')
+        if hasattr(self, "_settings"):
+            settings_dict = object.__getattribute__(self._settings, "__dict__")
             if name in settings_dict:
                 return settings_dict[name]
 
@@ -210,7 +191,7 @@ class LegacyConfigWrapper:
 
     def __getitem__(self, key: str):
         """Provide dict-like access."""
-        if hasattr(self, '_dict') and key in self._dict:
+        if hasattr(self, "_dict") and key in self._dict:
             return self._dict[key]
         raise KeyError(key)
 
@@ -227,7 +208,7 @@ class LegacyConfigWrapper:
         warnings.warn(
             "standardize() is deprecated and no longer needed with Pydantic settings",
             DeprecationWarning,
-            stacklevel=2
+            stacklevel=2,
         )
 
     def dict(self):
@@ -236,19 +217,19 @@ class LegacyConfigWrapper:
 
     def __contains__(self, key: str):
         """Support 'in' operator."""
-        return hasattr(self, '_dict') and key in self._dict
+        return hasattr(self, "_dict") and key in self._dict
 
     def keys(self):
         """Return dict keys for compatibility."""
-        return self._dict.keys() if hasattr(self, '_dict') else []
+        return self._dict.keys() if hasattr(self, "_dict") else []
 
     def values(self):
         """Return dict values for compatibility."""
-        return self._dict.values() if hasattr(self, '_dict') else []
+        return self._dict.values() if hasattr(self, "_dict") else []
 
     def items(self):
         """Return dict items for compatibility."""
-        return self._dict.items() if hasattr(self, '_dict') else []
+        return self._dict.items() if hasattr(self, "_dict") else []
 
 
 def create_settings_from_dict(data: dict) -> LegacyConfigWrapper:

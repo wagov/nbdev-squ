@@ -14,141 +14,145 @@ import logging
 
 import pandas
 from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
-from markdown import markdown
 
 from . import api
 
 logger = logging.getLogger(__name__)
 
 
-def adx_query(kql):
-    """
-    Run a kusto query
+def adx_query(kql: str | list[str]):
+    """Run a Kusto query against Azure Data Explorer.
 
     Args:
-        kql (str or list): kusto query or list of queries
+        kql: Single query string or list of queries to execute as script
 
     Returns:
-        json: query results
+        Query results from primary result set
     """
     if isinstance(kql, list):
-        kql = [".execute script with (ContinueOnErrors=true) <|"] + kql
-        kql = "\n".join(kql)
+        kql = "\n".join([".execute script with (ContinueOnErrors=true) <|"] + kql)
+
     config = api.cache["config"]
-    cluster, dx_db = config.azure_dataexplorer.rsplit("/", 1)
-    dx_client = KustoClient(KustoConnectionStringBuilder.with_az_cli_authentication(cluster))
-    return dx_client.execute(dx_db, kql.replace("\\", "\\\\")).primary_results[0]
+    cluster, database = config.azure_dataexplorer.rsplit("/", 1)
+    client = KustoClient(KustoConnectionStringBuilder.with_az_cli_authentication(cluster))
+
+    return client.execute(database, kql.replace("\\", "\\\\")).primary_results[0]
 
 
-def adxtable2df(table):
-    """
-    Return a pandas dataframe from an adx table
-    """
+def adxtable2df(table) -> pandas.DataFrame:
+    """Convert ADX table to pandas DataFrame."""
     columns = [col.column_name for col in table.columns]
-    frame = pandas.DataFrame(table.raw_rows, columns=columns)
-    return frame
+    return pandas.DataFrame(table.raw_rows, columns=columns)
 
 
 def export_jira_issues(dry_run=False):
-    """
-    Exports all JIRA issues to the data lake.
-    
-    Args:
-        dry_run (bool): If True, fetch data but don't write to datalake
-    """
+    """Exports all JIRA issues to the data lake for the last 7 days."""
+    batch_size = 100
+    days_to_export = 7
+
     jira_issues_path = api.datalake_path() / "jira_outputs" / "issues"
 
-    def getissues(start_at, jql):
-        # Simple Jira JQL query - let the library handle errors naturally
-        response = api.clients.jira.jql(jql, start=start_at, limit=100)
-        
-        # Basic validation - trust the library for error handling
-        if not response or not isinstance(response, dict):
-            raise ValueError(f"Invalid response from Jira: {type(response)}")
-        
-        # Handle different response formats (standard vs. modern API)
-        if "startAt" in response and "maxResults" in response:
-            # Standard Jira API format
-            next_start = response["startAt"] + response["maxResults"]
-            total_rows = response["total"]
-            issues = response["issues"]
-        elif "nextPageToken" in response:
-            # Modern paginated API format
-            next_start = start_at + 100  # Increment by limit
-            total_rows = response.get("total", len(response.get("issues", [])))
-            issues = response["issues"]
-            # If there's no nextPageToken, we're at the end
-            if not response.get("nextPageToken"):
-                next_start = total_rows
-        else:
-            # Fallback - assume single page response
-            issues = response.get("issues", response.get("values", []))
-            total_rows = len(issues)
-            next_start = total_rows
-            
-        if next_start > total_rows:
-            next_start = total_rows
-            
-        return next_start, total_rows, issues
+    def _get_jira_batch(start_at: int, jql: str) -> tuple[int, int, list]:
+        """Get a batch of Jira issues and return (next_start, total, issues)."""
+        response = api.clients.jira.jql(jql, start=start_at, limit=batch_size)
 
-    def save_date_issues(after_date: pandas.Timestamp, path=jira_issues_path, dry_run=False):
-        fromdate = after_date
-        jql = f"updated >= {fromdate.date().isoformat()} and updated < {(fromdate + pandas.to_timedelta('1d')).date().isoformat()} order by key"
-        output = path / f"{fromdate.date().isoformat()}" / "issues.parquet"
-        
-        if not dry_run and output.exists() and fromdate < pandas.Timestamp.now() - pandas.to_timedelta("1d"):
-            return None  # Skip previously dumped days except for last day
-        
-        start_at, total_rows = 0, -1
+        if not response or not isinstance(response, dict):
+            raise ValueError(f"Invalid Jira response: {type(response)}")
+
+        # Handle standard Jira API format
+        if "startAt" in response and "maxResults" in response:
+            return (
+                response["startAt"] + response["maxResults"],
+                response["total"],
+                response["issues"],
+            )
+
+        # Handle paginated API or fallback
+        issues = response.get("issues", response.get("values", []))
+        total = response.get("total", len(issues))
+        next_start = start_at + batch_size if response.get("nextPageToken") else total
+
+        return min(next_start, total), total, issues
+
+    def _save_parquet(df: pandas.DataFrame, output_path) -> None:
+        """Save DataFrame to parquet, handling both local and blob storage."""
+        if str(output_path).startswith("az://"):
+            # Blob storage - write directly without mkdir
+            df.to_parquet(output_path)
+        else:
+            # Local storage - create directory if needed
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            df.to_parquet(output_path)
+
+    def _export_day(date: pandas.Timestamp) -> pandas.DataFrame | None:
+        """Export Jira issues for a single day."""
+        next_date = date + pandas.Timedelta(days=1)
+        jql = f"updated >= {date.date()} and updated < {next_date.date()} order by key"
+        output = jira_issues_path / f"{date.date()}" / "issues.parquet"
+
+        # Skip if already exists and not today
+        if (
+            not dry_run
+            and output.exists()
+            and date < pandas.Timestamp.now() - pandas.Timedelta(days=1)
+        ):
+            return None
+
+        # Collect all pages
         dataframes = []
-        
-        while start_at != total_rows:
-            start_at, total_rows, issues = getissues(start_at, jql)
+        start_at = 0
+        total = -1
+
+        while start_at != total:
+            start_at, total, issues = _get_jira_batch(start_at, jql)
             if issues:
                 dataframes.append(pandas.DataFrame(issues))
-            if start_at == 100:  # Log progress after first batch
-                logger.info(f"{total_rows} total issues to load for {fromdate.date()}")
-        
-        if dataframes:
-            df = pandas.concat(dataframes, ignore_index=True)
-            df["fields"] = df["fields"].apply(json.dumps)
-            if not dry_run:
-                output.parent.mkdir(parents=True, exist_ok=True)
-                df.to_parquet(output)
-            return df
-        return None
+            if len(dataframes) == 1:  # Log after first batch
+                logger.info(f"Loading {total} total issues for {date.date()}")
 
-    after = pandas.Timestamp.now() - pandas.to_timedelta("7d")
-    until = pandas.Timestamp.now() + pandas.to_timedelta("1d")
+        if not dataframes:
+            return None
 
-    while after < until:
-        save_date_issues(after, path=jira_issues_path, dry_run=dry_run)
-        after += pandas.to_timedelta("1d")
+        # Combine and save
+        df = pandas.concat(dataframes, ignore_index=True)
+        df["fields"] = df["fields"].apply(json.dumps)
+
+        if not dry_run:
+            _save_parquet(df, output)
+
+        return df
+
+    # Export last 7 days
+    start_date = pandas.Timestamp.now() - pandas.Timedelta(days=days_to_export)
+    current_date = start_date
+
+    while current_date <= pandas.Timestamp.now():
+        _export_day(current_date)
+        current_date += pandas.Timedelta(days=1)
 
 
-def flatten(nested_dict, parent_key="", sep="_"):
-    """
-    Flatten a nested dictionary.
+def flatten(nested_dict: dict, parent_key: str = "", sep: str = "_") -> dict:
+    """Flatten a nested dictionary into a single level.
 
     Args:
-        nested_dict (dict): The nested dictionary to flatten.
-        parent_key (str, optional): The parent key for the current level of nesting.
-        sep (str, optional): The separator to use for flattened keys.
+        nested_dict: The nested dictionary to flatten
+        parent_key: Parent key for current nesting level
+        sep: Separator for flattened keys
 
     Returns:
-        dict: The flattened dictionary.
+        Flattened dictionary with concatenated keys
     """
-    flat_dict = {}
+    result = {}
 
     for key, value in nested_dict.items():
         new_key = f"{parent_key}{sep}{key}" if parent_key else key
 
         if isinstance(value, dict):
-            flat_dict.update(flatten(value, new_key, sep))
+            result.update(flatten(value, new_key, sep))
         else:
-            flat_dict[new_key] = value
+            result[new_key] = value
 
-    return flat_dict
+    return result
 
 
 def sentinel_beautify_local(
@@ -157,75 +161,121 @@ def sentinel_beautify_local(
     default_status: str = "Onboard: MOU (T0)",
     default_orgid: int = 2,
 ):
-    """
-    Takes a SecurityIncident including alerts as json and returns
-    markdown, html and detailed json representation.
-    """
-    for jsonfield in ["Labels", "Owner", "AdditionalData", "Comments"]:
-        if data.get(jsonfield):
-            data[jsonfield] = json.loads(data[jsonfield])
+    """Convert SecurityIncident to markdown and structured data for JIRA."""
+    max_alerts = 10
+    max_wiki_length = 32760
+
+    # Parse JSON fields
+    for field in ["Labels", "Owner", "AdditionalData", "Comments"]:
+        if data.get(field) and isinstance(data[field], str):
+            data[field] = json.loads(data[field])
+
+    labels, incident_details = _extract_incident_info(data)
+    comments = _extract_comments(data.get("Comments", []))
+    alert_details, observables = _process_alerts(data.get("AlertData", [])[:max_alerts])
+
+    title = f"SIEM Detection #{data['IncidentNumber']} Sev:{data['Severity']} - {data['Title']} (Status:{data['Status']})"
+
+    mdtext = "\n".join(
+        [
+            f"# {title}",
+            "",
+            f"## [SecurityIncident #{data['IncidentNumber']} Details]({data['IncidentUrl']})",
+            "",
+            *incident_details,
+            *comments,
+            *alert_details,
+        ]
+    )
+
+    # Clean and deduplicate labels
+    clean_labels = set("".join(c for c in label if c.isalnum() or c in ".:_") for label in labels)
+
+    # Get customer info
+    customer = _get_customer_info(data["TenantId"], default_status, default_orgid)
+
+    return {
+        "subject": title,
+        "labels": list(clean_labels),
+        "observables": [dict(ts) for ts in set(tuple(i.items()) for i in observables)],
+        "sentinel_data": data,
+        "wikimarkup": api.atlaskit_transformer(mdtext)[:max_wiki_length],
+        **customer,
+    }
+
+
+def _extract_incident_info(data: dict) -> tuple[list[str], list[str]]:
+    """Extract labels and incident details from security incident data."""
     labels = [
         f"SIEM_Severity:{data['Severity']}",
         f"SIEM_Status:{data['Status']}",
         f"SIEM_Title:{data['Title']}",
     ]
-    labels += [label["labelName"] for label in data["Labels"]]  # copy over labels from incident
+    labels.extend(label["labelName"] for label in data.get("Labels", []))
+
     incident_details = [data["Description"], ""]
 
-    if data.get("Owner"):
-        owner = None
-        if data["Owner"].get("email"):
-            owner = data["Owner"]["email"]
-        elif data["Owner"].get("userPrincipalName"):
-            owner = data["Owner"]["userPrincipalName"]
+    # Add owner info
+    if owner_data := data.get("Owner"):
+        owner = owner_data.get("email") or owner_data.get("userPrincipalName")
         if owner:
             labels.append(f"SIEM_Owner:{owner}")
             incident_details.append(f"- **Sentinel Incident Owner:** {owner}")
 
-    if data.get("Classification"):
-        labels.append(f"SIEM_Classification:{data['Classification']}")
-        incident_details.append(f"- **Alert Classification:** {data['Classification']}")
+    # Add classification info
+    for field, label_prefix, detail_name in [
+        ("Classification", "SIEM_Classification", "Alert Classification"),
+        ("ClassificationReason", "SIEM_ClassificationReason", "Alert Classification Reason"),
+        ("ProviderName", "SIEM_ProviderName", "Provider Name"),
+    ]:
+        if value := data.get(field):
+            labels.append(f"{label_prefix}:{value}")
+            incident_details.append(f"- **{detail_name}:** {value}")
 
-    if data.get("ClassificationReason"):
-        labels.append(f"SIEM_ClassificationReason:{data['ClassificationReason']}")
-        incident_details.append(
-            f"- **Alert Classification Reason:** {data['ClassificationReason']}"
-        )
+    # Add additional data
+    if additional := data.get("AdditionalData"):
+        _process_additional_data(additional, labels, incident_details)
 
-    if data.get("ProviderName"):
-        labels.append(f"SIEM_ProviderName:{data['ProviderName']}")
-        incident_details.append(f"- **Provider Name:** {data['ProviderName']}")
+    return labels, incident_details
 
-    if data.get("AdditionalData"):
-        if data["AdditionalData"].get("alertProductNames"):
-            product_names = ",".join(data["AdditionalData"]["alertProductNames"])
-            labels.append(f"SIEM_alertProductNames:{product_names}")
-            incident_details.append(f"- **Product Names:** {product_names}")
-        if data["AdditionalData"].get("tactics"):
-            tactics = ",".join(data["AdditionalData"]["tactics"])
-            labels.append(f"SIEM_tactics:{tactics}")
-            incident_details.append(
-                f"- **[MITRE ATT&CK Tactics](https://attack.mitre.org/tactics/):** {tactics}"
-            )
-        if data["AdditionalData"].get("techniques"):
-            techniques = ",".join(data["AdditionalData"]["techniques"])
-            labels.append(f"SIEM_techniques:{techniques}")
-            incident_details.append(
-                "- **[MITRE ATT&CK Techniques](https://attack.mitre.org/techniques/):**"
-                f" {techniques}"
-            )
 
-    comments = []
-    if data.get("Comments"):
-        if len(data["Comments"]) > 0:
-            comments += ["", "## Comments"]
-            for comment in data["Comments"]:
-                comments += comment["message"].split("\n")
-            comments += [""]
+def _process_additional_data(additional: dict, labels: list, details: list) -> None:
+    """Process AdditionalData fields for labels and details."""
+    mappings = [
+        ("alertProductNames", "SIEM_alertProductNames", "Product Names"),
+        ("tactics", "SIEM_tactics", "[MITRE ATT&CK Tactics](https://attack.mitre.org/tactics/)"),
+        (
+            "techniques",
+            "SIEM_techniques",
+            "[MITRE ATT&CK Techniques](https://attack.mitre.org/techniques/)",
+        ),
+    ]
 
-    alert_details = []
-    observables = []
-    entity_type_value_mappings = {
+    for field, label_prefix, detail_name in mappings:
+        if values := additional.get(field):
+            joined_values = ",".join(values)
+            labels.append(f"{label_prefix}:{joined_values}")
+            details.append(f"- **{detail_name}:** {joined_values}")
+
+
+def _extract_comments(comments: list) -> list[str]:
+    """Extract and format comments."""
+    if not comments:
+        return []
+
+    result = ["", "## Comments"]
+    for comment in comments:
+        result.extend(comment["message"].split("\n"))
+    result.append("")
+    return result
+
+
+def _process_alerts(alerts: list) -> tuple[list[str], list[dict]]:
+    """Process alerts and extract observables."""
+    if not alerts:
+        return [], []
+
+    entity_mappings = {
         "host": "{HostName}",
         "account": "{Name}",
         "process": "{CommandLine}",
@@ -237,111 +287,103 @@ def sentinel_beautify_local(
         "filehash": "{Algorithm}{Value}",
     }
 
-    class Default(dict):
-        """
-        Default dict that returns the key if the key is not found
-        Args:
-            dict
-        """
-
+    class _DefaultDict(dict):
         def __missing__(self, key):
             return key
 
-    for alert in data["AlertData"][:10]:  # Assumes alertdata is newest to oldest
-        if not alert_details:
-            alert_details += [
-                "",
-                "## Alert Details",
-                (
-                    "The last day of activity (up to 10 alerts) is summarised below from"
-                    " newest to oldest."
-                ),
-            ]
+    alert_details = [
+        "",
+        "## Alert Details",
+        "The last day of activity (up to 10 alerts) is summarised below from newest to oldest.",
+    ]
+    observables = []
+
+    for alert in alerts:
+        # Add alert header
         alert_details.append(
             f"### [{alert['AlertName']} (Severity:{alert['AlertSeverity']}) - "
-            + f"TimeGenerated {alert['TimeGenerated']}]({alert['AlertLink']})"
+            f"TimeGenerated {alert['TimeGenerated']}]({alert['AlertLink']})"
         )
         alert_details.append(alert["Description"])
-        for key in [
-            "RemediationSteps",
-            "ExtendedProperties",
-            "Entities",
-        ]:  # entities last as may get truncated
-            if alert.get(key):
-                if isinstance(alert[key], str) and alert[key][0] in ["{", "["]:
-                    alert[key] = json.loads(alert[key])
-                if key == "Entities":  # add the entity to our list of observables
-                    for entity in alert[key]:
-                        observable = {"value": None}
-                        if "Type" in entity:
-                            observable = {
-                                "type": entity["Type"],
-                                "value": entity_type_value_mappings.get(
-                                    entity["Type"], ""
-                                ).format_map(Default(entity)),
-                            }
-                        if not observable["value"]:  # dump whole dict as string if no mapping found
-                            observable["value"] = repr(entity)
+
+        # Process alert fields
+        for field in ["RemediationSteps", "ExtendedProperties", "Entities"]:
+            if not alert.get(field):
+                continue
+
+            # Parse JSON strings
+            value = alert[field]
+            if isinstance(value, str) and value.startswith(("{", "[")):
+                value = json.loads(value)
+
+            # Extract entities as observables
+            if field == "Entities":
+                for entity in value:
+                    observable = _extract_observable(entity, entity_mappings, _DefaultDict())
+                    if observable:
                         observables.append(observable)
-                if alert[key] and isinstance(alert[key], list) and isinstance(alert[key][0], dict):
-                    # if list of dicts, make a table
-                    for index, entry in enumerate(
-                        [flatten(item) for item in alert[key] if len(item.keys()) > 1]
-                    ):
-                        alert_details += ["", f"#### {key}.{index}"]
-                        for entrykey, value in entry.items():
-                            if value:
-                                alert_details.append(f"- **{entrykey}:** {value}")
-                elif isinstance(alert[key], dict):  # if dict display as list
-                    alert_details += ["", f"#### {key}"]
-                    for entrykey, value in alert[key].items():
-                        if value and len(value) < 200:
-                            alert_details.append(f"- **{entrykey}:** {value}")
-                        elif value:  # break out long blocks
-                            alert_details += [f"- **{entrykey}:**", "", "```", value, "```", ""]
-                else:  # otherwise just add as separate lines
-                    alert_details += ["", f"#### {key}"] + [item for item in alert[key]]
 
-    title = (
-        f"SIEM Detection #{data['IncidentNumber']} Sev:{data['Severity']} -"
-        f" {data['Title']} (Status:{data['Status']})"
-    )
-    mdtext = (
-        [
-            f"# {title}",
-            "",
-            f"## [SecurityIncident #{data['IncidentNumber']} Details]({data['IncidentUrl']})",
-            "",
-        ]
-        + incident_details
-        + comments
-        + alert_details
-    )
-    mdtext = "\n".join([str(line) for line in mdtext])
-    # Convert markdown to HTML (returned for potential use)
-    markdown(mdtext, extensions=["tables"])
-    # remove special chars and deduplicate labels
-    labels = set("".join(c for c in label if c.isalnum() or c in ".:_") for label in labels)
+            # Format field for display
+            _format_alert_field(alert_details, field, value)
 
-    response = {
-        "subject": title,
-        "labels": list(labels),
-        "observables": [dict(ts) for ts in set(tuple(i.items()) for i in observables)],
-        "sentinel_data": data,
-    }
-    workspaces_df = api.list_workspaces()
-    customer = workspaces_df[workspaces_df["customerId"] == data["TenantId"]].to_dict("records")
-    if len(customer) > 0:
-        customer = customer[0]
+    return alert_details, observables
+
+
+def _extract_observable(entity: dict, mappings: dict, default_dict) -> dict | None:
+    """Extract observable from entity data."""
+    if "Type" not in entity:
+        return {"type": "unknown", "value": repr(entity)}
+
+    entity_type = entity["Type"]
+    template = mappings.get(entity_type, "")
+
+    try:
+        value = template.format_map(default_dict(entity)) if template else repr(entity)
+        return {"type": entity_type, "value": value} if value else None
+    except (KeyError, ValueError):
+        return {"type": entity_type, "value": repr(entity)}
+
+
+def _format_alert_field(details: list, field: str, value) -> None:
+    """Format alert field for markdown display."""
+    if not value:
+        return
+
+    if isinstance(value, list) and value and isinstance(value[0], dict):
+        # List of dicts - create sections
+        for i, entry in enumerate(flatten(item) for item in value if len(item.keys()) > 1):
+            details.extend(["", f"#### {field}.{i}"])
+            for key, val in entry.items():
+                if val:
+                    details.append(f"- **{key}:** {val}")
+
+    elif isinstance(value, dict):
+        # Dict - show as bullet points
+        details.extend(["", f"#### {field}"])
+        for key, val in value.items():
+            if not val:
+                continue
+            if len(str(val)) < 200:
+                details.append(f"- **{key}:** {val}")
+            else:
+                details.extend([f"- **{key}:**", "", "```", str(val), "```", ""])
+
     else:
-        customer = {}
-    # Grab wiki format for jira and truncate to 32767 chars
-    response.update(
-        {
-            "secops_status": customer.get("SecOps Status") or default_status,
-            "jira_orgid": customer.get("JiraOrgId") or default_orgid,
-            "customer": customer,
-            "wikimarkup": (api.atlaskit_transformer(mdtext)[:32760]),
-        }
-    )
-    return response
+        # List or other - show as lines
+        details.extend(
+            ["", f"#### {field}"]
+            + [str(item) for item in (value if isinstance(value, list) else [value])]
+        )
+
+
+def _get_customer_info(tenant_id: str, default_status: str, default_orgid: int) -> dict:
+    """Get customer information from tenant ID."""
+    workspaces_df = api.list_workspaces()
+    customer_records = workspaces_df[workspaces_df["customerId"] == tenant_id].to_dict("records")
+    customer = customer_records[0] if customer_records else {}
+
+    return {
+        "secops_status": customer.get("SecOps Status", default_status),
+        "jira_orgid": customer.get("JiraOrgId", default_orgid),
+        "customer": customer,
+    }

@@ -172,7 +172,7 @@ class TestJiraIntegration:
     def jira_client(self, authenticated_clients):
         """Get Jira client if configured."""
         clients = authenticated_clients
-        if not hasattr(clients, 'jira') or clients.jira is None:
+        if not hasattr(clients, "jira") or clients.jira is None:
             pytest.skip("Jira client not configured")
         return clients.jira
 
@@ -215,7 +215,7 @@ class TestJiraIntegration:
             result = jira_client.jql(
                 "created >= -14d order by created desc",
                 limit=3,
-                fields="key,summary,status,created"
+                fields="key,summary,status,created",
             )
 
             assert isinstance(result, dict)
