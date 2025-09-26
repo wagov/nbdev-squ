@@ -52,7 +52,7 @@ class TestAzureIntegration:
         # Verify we have at least some workspaces
         assert len(workspaces) > 0
 
-        print(f"✅ Found {len(workspaces)} Azure Sentinel workspaces")
+        print(f"Found {len(workspaces)} Azure Sentinel workspaces")
 
     def test_list_workspaces_formats(self, authenticated_clients):
         """Test different output formats for workspace listing."""
@@ -74,7 +74,7 @@ class TestAzureIntegration:
         list_result = list_workspaces(fmt="list")
         assert isinstance(list_result, list)
 
-        print("✅ All workspace output formats work correctly")
+        print("All workspace output formats work correctly")
 
     def test_list_securityinsights_integration(self, authenticated_clients):
         """Test listing actual Azure Security Insights resources."""
@@ -91,7 +91,7 @@ class TestAzureIntegration:
         expected_columns = {"customerId", "name"}
         assert expected_columns.issubset(set(insights.columns))
 
-        print(f"✅ Found {len(insights)} Security Insights resources")
+        print(f"Found {len(insights)} Security Insights resources")
 
     def test_simple_kql_query(self, authenticated_clients):
         """Test a simple, non-destructive KQL query."""
@@ -117,7 +117,7 @@ class TestAzureIntegration:
                 expected_schema_columns = {"ColumnName", "ColumnType"}
                 assert expected_schema_columns.issubset(set(result.columns))
 
-            print(f"✅ KQL query executed successfully, returned {len(result)} schema rows")
+            print(f"KQL query executed successfully, returned {len(result)} schema rows")
 
         except Exception as e:
             # Some workspaces might not have SecurityEvent table
@@ -131,7 +131,7 @@ class TestAzureIntegration:
         config = clients.config
         assert hasattr(config, "keys")  # Should be dict-like
 
-        print("✅ Client configuration loaded successfully")
+        print("Client configuration loaded successfully")
 
     @pytest.mark.slow
     def test_multiple_workspace_query(self, authenticated_clients):
@@ -158,7 +158,7 @@ class TestAzureIntegration:
 
             assert isinstance(result, pd.DataFrame)
 
-            print(f"✅ Multi-workspace query successful, {len(result)} total results")
+            print(f"Multi-workspace query successful, {len(result)} total results")
 
         except Exception as e:
             pytest.skip(f"Multi-workspace query failed: {e}")
@@ -179,40 +179,28 @@ class TestJiraIntegration:
     def test_jira_api_available(self, jira_client):
         """Test that Jira API is available."""
         # Check that the client has the standard jql method
-        assert hasattr(jira_client, "jql")
+        assert hasattr(jira_client, "enhanced_jql")
 
-        print("✅ Jira API methods available")
+        print("Jira API methods available")
 
-    def test_jira_simple_query(self, jira_client):
-        """Test a simple, non-destructive Jira query."""
-        # Simple query to get a few issues (read-only) with date bounds
-        result = jira_client.jql("created >= -30d order by created desc", limit=5)
-
-        # Should return a dict with issues
-        assert isinstance(result, dict)
-        # Check for either 'issues' or 'values' key (different Jira API versions)
-        issues_key = "issues" if "issues" in result else "values"
-        assert issues_key in result, f"Response keys: {list(result.keys())}"
-
-        print(f"✅ Jira query successful, found {len(result.get(issues_key, []))} issues")
 
     def test_jira_jql_direct(self, jira_client):
         """Test direct JQL method call."""
         # Test direct jql call with date bounds
-        result = jira_client.jql("created >= -7d order by created desc", limit=3)
+        result = jira_client.enhanced_jql("created >= -7d order by created desc", limit=3)
 
         assert isinstance(result, dict)
         # Check for either 'issues' or 'values' key (different Jira API versions)
         issues_key = "issues" if "issues" in result else "values"
         assert issues_key in result, f"Response keys: {list(result.keys())}"
 
-        print(f"✅ JQL direct call successful, found {len(result.get(issues_key, []))} issues")
+        print(f"JQL direct call successful, found {len(result.get(issues_key, []))} issues")
 
     def test_jira_query_with_fields(self, jira_client):
         """Test JQL query with specific fields."""
         try:
             # Query with specific fields and date bounds
-            result = jira_client.jql(
+            result = jira_client.enhanced_jql(
                 "created >= -14d order by created desc",
                 limit=3,
                 fields="key,summary,status,created",
@@ -230,7 +218,7 @@ class TestJiraIntegration:
                 expected_fields = {"summary", "status", "created"}
                 assert any(field in fields for field in expected_fields)
 
-            print("✅ Jira query with fields successful")
+            print("Jira query with fields successful")
 
         except Exception as e:
             pytest.skip(f"Jira query with fields failed: {e}")
@@ -239,7 +227,7 @@ class TestJiraIntegration:
         """Test JQL query for a specific project (if any exist)."""
         try:
             # First, try to get any project with date bounds
-            result = jira_client.jql("created >= -30d order by created desc", limit=1)
+            result = jira_client.enhanced_jql("created >= -30d order by created desc", limit=1)
 
             if not result.get("issues"):
                 pytest.skip("No issues found to test project queries")
@@ -252,12 +240,12 @@ class TestJiraIntegration:
                 pytest.skip("No project key found in issue data")
 
             # Query specific project
-            project_result = jira_client.jql(f"project = {project_key}", limit=5)
+            project_result = jira_client.enhanced_jql(f"project = {project_key}", limit=5)
 
             assert isinstance(project_result, dict)
             assert "issues" in project_result
 
-            print(f"✅ Project-specific query successful for {project_key}")
+            print(f"Project-specific query successful for {project_key}")
 
         except Exception as e:
             pytest.skip(f"Project query failed: {e}")
@@ -267,11 +255,11 @@ class TestJiraIntegration:
 def run_integration_tests():
     """Run integration tests if environment is configured."""
     if not os.getenv("SQU_CONFIG"):
-        print("❌ SQU_CONFIG not set - integration tests will be skipped")
+        print("SQU_CONFIG not set - integration tests will be skipped")
         print("   Set SQU_CONFIG=keyvault_name/tenant_id to enable integration tests")
         return False
 
-    print("✅ SQU_CONFIG found - integration tests will run")
+    print("SQU_CONFIG found - integration tests will run")
     return True
 
 

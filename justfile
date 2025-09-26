@@ -7,7 +7,7 @@ install:
     uv sync --dev
     npm install
     npm run build
-    @echo "✅ Development environment ready!"
+    @echo "Development environment ready!"
 
 # Run tests (fast, integration, or with coverage)
 test type="fast":
@@ -21,7 +21,7 @@ test type="fast":
 
 # Lint and format code
 lint:
-    uv run ruff check src/ tests/
+    uv run ruff check --fix --unsafe-fixes src/ tests/
     uv run ruff format src/ tests/
 
 # Type check

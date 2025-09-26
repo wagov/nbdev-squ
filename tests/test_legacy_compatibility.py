@@ -247,7 +247,7 @@ def test_export_jira_issues_dry_run():
                     # Verify no files were created
                     files_created = list(Path(temp_dir).rglob("*"))
                     assert len(files_created) == 0, f"Dry run created files: {files_created}"
-                    print("✅ Export dry run successful - no files created")
+                    print("Export dry run successful - no files created")
 
                 except Exception as e:
                     # If there are no recent issues, that is acceptable for testing

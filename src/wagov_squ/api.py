@@ -81,10 +81,10 @@ class Clients:
     def jira(self):
         """
         Returns a Jira client for issue tracking and project management.
-        
+
         This client is configured for Jira Cloud and uses enhanced_jql for all JQL operations.
         The legacy jql method is disabled to ensure proper nextPageToken pagination.
-        
+
         Usage:
             # Correct - using enhanced_jql with proper pagination
             response = client.jira.enhanced_jql(
@@ -92,7 +92,7 @@ class Clients:
                 limit=100,
                 nextPageToken=None  # or token from previous response
             )
-            
+
             # Incorrect - will raise NotImplementedError
             client.jira.jql('project = DEMO')
         """
@@ -102,7 +102,7 @@ class Clients:
             password=self.config.jira_password,
             cloud=True,
         )
-        
+
         # Override the legacy jql method to prevent accidental usage for cloud instances
         # All cloud code should use enhanced_jql which supports proper nextPageToken pagination
         def _deprecated_jql(*args, **kwargs):
@@ -111,7 +111,7 @@ class Clients:
                 "Use 'enhanced_jql' instead for proper nextPageToken pagination support. "
                 "See: https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-user-privacy-api-migration-guide/"
             )
-        
+
         jira_client.jql = _deprecated_jql
         return jira_client
 

@@ -202,15 +202,6 @@ class LegacyConfigWrapper:
         except KeyError:
             return default
 
-    def standardize(self):
-        """Backward compatibility - benedict had this method."""
-        # This was used in the original code, now it's a no-op
-        warnings.warn(
-            "standardize() is deprecated and no longer needed with Pydantic settings",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
     def dict(self):
         """Return dict representation."""
         return self._dict

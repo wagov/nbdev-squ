@@ -15,9 +15,14 @@ import logging
 import pandas
 from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
 
-from . import api
+from . import api, core
 
 logger = logging.getLogger(__name__)
+
+
+class _DefaultDict(dict):
+    def __missing__(self, key):
+        return None
 
 
 def adx_query(kql: str | list[str]):
@@ -32,7 +37,7 @@ def adx_query(kql: str | list[str]):
     if isinstance(kql, list):
         kql = "\n".join([".execute script with (ContinueOnErrors=true) <|"] + kql)
 
-    config = api.cache["config"]
+    config = core.cache["config"]
     cluster, database = config.azure_dataexplorer.rsplit("/", 1)
     client = KustoClient(KustoConnectionStringBuilder.with_az_cli_authentication(cluster))
 
@@ -46,14 +51,10 @@ def adxtable2df(table) -> pandas.DataFrame:
 
 
 def export_jira_issues(
-    dry_run=False, 
-    force_refresh=False, 
-    include_today=False,
-    days_to_export=7,
-    batch_size=100
+    dry_run=False, force_refresh=False, include_today=False, days_to_export=7, batch_size=100
 ):
     """Exports all JIRA issues to the data lake.
-    
+
     Args:
         dry_run: If True, don't actually save files
         force_refresh: If True, re-process existing files (useful for merging new updates)
@@ -62,28 +63,28 @@ def export_jira_issues(
         batch_size: Pagination batch size (default: 100)
     """
 
-    logger.info(f"🚀 Starting JIRA issues export ({'DRY RUN' if dry_run else 'LIVE'})")
-    logger.info(f"📅 Exporting {days_to_export} days of data")
+    logger.info(f"Starting JIRA issues export ({'DRY RUN' if dry_run else 'LIVE'})")
+    logger.info(f"Exporting {days_to_export} days of data")
 
-    jira_issues_path = api.datalake_path() / "jira_outputs" / "issues"
-    logger.info(f"📁 Output path: {jira_issues_path}")
+    jira_issues_path = core.datalake_path() / "jira_outputs" / "issues"
+    logger.info(f"Output path: {jira_issues_path}")
 
     def _get_jira_batch(page_token: str | None, jql: str) -> tuple[str | None, int, list]:
         """Get a batch of Jira issues and return (next_page_token, total, issues)."""
-        token_display = '<token>' if page_token else 'None'
-        logger.debug(f"🔍 Fetching batch: page_token={token_display}, limit={batch_size}")
-        
+        token_display = "<token>" if page_token else "None"
+        logger.debug(f"Fetching batch: page_token={token_display}, limit={batch_size}")
+
         # Use enhanced_jql for Cloud with nextPageToken pagination
         response = api.clients.jira.enhanced_jql(jql, limit=batch_size, nextPageToken=page_token)
 
         if not response or not isinstance(response, dict):
             raise ValueError(f"Invalid Jira response: {type(response)}")
 
-        logger.debug(f"📥 Response keys: {list(response.keys())}")
+        logger.debug(f"Response keys: {list(response.keys())}")
 
         issues = response.get("issues", response.get("values", []))
         next_page_token = response.get("nextPageToken")
-        
+
         # For enhanced_jql, we don't get total upfront, so estimate based on pagination
         if next_page_token:
             # More pages available, use a large number as placeholder
@@ -91,9 +92,11 @@ def export_jira_issues(
         else:
             # Last page, we can't determine exact total but we know we're done
             total = len(issues) if page_token is None else 999999
-        
-        next_display = '<token>' if next_page_token else 'None'
-        logger.debug(f"📊 Enhanced JQL: next_page_token={next_display}, total={total}, issues_in_batch={len(issues)}")
+
+        next_display = "<token>" if next_page_token else "None"
+        logger.debug(
+            f"Enhanced JQL: next_page_token={next_display}, total={total}, issues_in_batch={len(issues)}"
+        )
         return next_page_token, total, issues
 
     def _save_parquet(df: pandas.DataFrame, output_path) -> None:
@@ -101,6 +104,7 @@ def export_jira_issues(
         if str(output_path).startswith("az://"):
             # Blob storage - use UPath write_bytes to maintain auth context
             import io
+
             with io.BytesIO() as buffer:
                 df.to_parquet(buffer, coerce_timestamps="ms", allow_truncated_timestamps=True)
                 buffer.seek(0)
@@ -112,23 +116,25 @@ def export_jira_issues(
 
     def _export_day(date: pandas.Timestamp) -> pandas.DataFrame | None:
         """Export Jira issues for a single day."""
-        logger.info(f"📆 Processing {date.date()}")
-        
+        logger.info(f"Processing {date.date()}")
+
         next_date = date + pandas.Timedelta(days=1)
         jql = f"updated >= {date.date()} and updated < {next_date.date()} order by key"
         output = jira_issues_path / f"{date.date()}" / "issues.parquet"
 
         # Determine if we should skip this date
         is_today = date.date() == pandas.Timestamp.now().date()
-        
+
         # Skip today unless specifically requested
         if is_today and not include_today:
-            logger.info(f"⏭️  Skipping {date.date()} (today) - use include_today=True to process")
+            logger.info(f" Skipping {date.date()} (today) - use include_today=True to process")
             return None
-        
+
         # Skip if file exists and we're not forcing refresh
         if not dry_run and output.exists() and not force_refresh and not is_today:
-            logger.info(f"⏭️  Skipping {date.date()} - already exists (use force_refresh=True to re-process)")
+            logger.info(
+                f" Skipping {date.date()} - already exists (use force_refresh=True to re-process)"
+            )
             return None
 
         # Collect all pages
@@ -140,52 +146,58 @@ def export_jira_issues(
         while True:
             batch_count += 1
             page_token, total, issues = _get_jira_batch(page_token, jql)
-            
+
             # Log progress every 20 batches instead of every batch
             if batch_count == 1 or batch_count % 20 == 0:
-                token_display = '<token>' if page_token else 'None'
-                logger.info(f"🔄 Batch {batch_count}: next_page_token: {token_display}, got {len(issues)} issues")
-            
+                token_display = "<token>" if page_token else "None"
+                logger.info(
+                    f"Batch {batch_count}: next_page_token: {token_display}, got {len(issues)} issues"
+                )
+
             if issues:
                 dataframes.append(pandas.DataFrame(issues))
             if len(dataframes) == 1:  # Log after first batch
                 if total > batch_size and total != 999999:  # Known total with multiple pages
-                    logger.info(f"📊 Found {total} total issues for {date.date()} (fetching in {batch_size}-issue batches)")
+                    logger.info(
+                        f"Found {total} total issues for {date.date()} (fetching in {batch_size}-issue batches)"
+                    )
                 elif total == 999999:  # Paginated API without known total
-                    logger.info(f"📊 Fetching issues for {date.date()} in {batch_size}-issue batches...")
+                    logger.info(
+                        f"Fetching issues for {date.date()} in {batch_size}-issue batches..."
+                    )
                 else:
-                    logger.info(f"📊 Found {total} total issues for {date.date()}")
+                    logger.info(f"Found {total} total issues for {date.date()}")
             elif len(dataframes) > 1 and len(dataframes) % 3 == 0:  # Progress every 3 batches
                 loaded = sum(len(df) for df in dataframes)
                 if total != 999999:
-                    logger.info(f"📥 Progress: {loaded} / {total} issues loaded...")
+                    logger.info(f"Progress: {loaded} / {total} issues loaded...")
                 else:
-                    logger.info(f"📥 Progress: {loaded} issues loaded (total unknown)...")
-            
+                    logger.info(f"Progress: {loaded} issues loaded (total unknown)...")
+
             # Stop when no more pages available
             if page_token is None:
                 break
-                
+
             # Additional safety: stop if we've done too many batches
             if batch_count > 500:  # More than 25,000 issues seems unlikely
-                logger.error(f"⚠️  Too many batches ({batch_count}), stopping to prevent runaway")
+                logger.error(f"Too many batches ({batch_count}), stopping to prevent runaway")
                 break
 
         if not dataframes:
-            logger.info(f"📭 No issues found for {date.date()}")
+            logger.info(f"No issues found for {date.date()}")
             return None
 
         # Combine and save
         df = pandas.concat(dataframes, ignore_index=True)
         df["fields"] = df["fields"].apply(json.dumps)
-        
-        logger.info(f"🔄 Processing {len(df)} issues for {date.date()}")
+
+        logger.info(f"Processing {len(df)} issues for {date.date()}")
 
         if not dry_run:
             _save_parquet(df, output)
-            logger.info(f"💾 Saved {len(df)} issues to {output}")
+            logger.info(f"Saved {len(df)} issues to {output}")
         else:
-            logger.info(f"🏃 DRY RUN: Would save {len(df)} issues")
+            logger.info(f"DRY RUN: Would save {len(df)} issues")
 
         return df
 
@@ -193,11 +205,11 @@ def export_jira_issues(
     start_date = pandas.Timestamp.now() - pandas.Timedelta(days=days_to_export)
     end_date = pandas.Timestamp.now()
     current_date = start_date
-    
+
     total_issues = 0
     days_processed = 0
 
-    logger.info(f"📅 Processing dates from {start_date.date()} to {end_date.date()}")
+    logger.info(f"Processing dates from {start_date.date()} to {end_date.date()}")
 
     while current_date <= end_date:
         df = _export_day(current_date)
@@ -206,7 +218,9 @@ def export_jira_issues(
         days_processed += 1
         current_date += pandas.Timedelta(days=1)
 
-    logger.info(f"✅ Export complete! Processed {days_processed} days with {total_issues} total issues")
+    logger.info(
+        f"Export complete! Processed {days_processed} days with {total_issues} total issues"
+    )
 
 
 def flatten(nested_dict: dict, parent_key: str = "", sep: str = "_") -> dict:
@@ -365,10 +379,6 @@ def _process_alerts(alerts: list) -> tuple[list[str], list[dict]]:
         "filehash": "{Algorithm}{Value}",
     }
 
-    class _DefaultDict(dict):
-        def __missing__(self, key):
-            return key
-
     alert_details = [
         "",
         "## Alert Details",
@@ -391,13 +401,16 @@ def _process_alerts(alerts: list) -> tuple[list[str], list[dict]]:
 
             # Parse JSON strings
             value = alert[field]
-            if isinstance(value, str) and value.startswith(("{", "[")):
-                value = json.loads(value)
+            try:
+                if isinstance(value, str) and value.startswith(("{", "[")):
+                    value = json.loads(value)
+            except json.JSONDecodeError:
+                logger.warning(f"Failed to parse potential JSON string: {value}")
 
             # Extract entities as observables
             if field == "Entities":
                 for entity in value:
-                    observable = _extract_observable(entity, entity_mappings, _DefaultDict())
+                    observable = _extract_observable(entity, entity_mappings)
                     if observable:
                         observables.append(observable)
 
@@ -407,7 +420,7 @@ def _process_alerts(alerts: list) -> tuple[list[str], list[dict]]:
     return alert_details, observables
 
 
-def _extract_observable(entity: dict, mappings: dict, default_dict) -> dict | None:
+def _extract_observable(entity: dict, mappings: dict) -> dict | None:
     """Extract observable from entity data."""
     if "Type" not in entity:
         return {"type": "unknown", "value": repr(entity)}
@@ -416,7 +429,7 @@ def _extract_observable(entity: dict, mappings: dict, default_dict) -> dict | No
     template = mappings.get(entity_type, "")
 
     try:
-        value = template.format_map(default_dict(entity)) if template else repr(entity)
+        value = template.format_map(_DefaultDict(entity)) if template else repr(entity)
         return {"type": entity_type, "value": value} if value else None
     except (KeyError, ValueError):
         return {"type": entity_type, "value": repr(entity)}
@@ -429,7 +442,7 @@ def _format_alert_field(details: list, field: str, value) -> None:
 
     if isinstance(value, list) and value and isinstance(value[0], dict):
         # List of dicts - create sections
-        for i, entry in enumerate(flatten(item) for item in value if len(item.keys()) > 1):
+        for i, entry in enumerate(flatten(item) for item in value if len(item.keys()) > 0):
             details.extend(["", f"#### {field}.{i}"])
             for key, val in entry.items():
                 if val:
