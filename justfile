@@ -4,7 +4,7 @@ default:
 
 # Install project in development mode
 install:
-    uv sync --dev
+    uv sync --extra dev
     npm install
     npm run build
     @echo "Development environment ready!"

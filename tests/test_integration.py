@@ -183,7 +183,6 @@ class TestJiraIntegration:
 
         print("Jira API methods available")
 
-
     def test_jira_jql_direct(self, jira_client):
         """Test direct JQL method call."""
         # Test direct jql call with date bounds

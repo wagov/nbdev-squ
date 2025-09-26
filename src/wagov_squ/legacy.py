@@ -470,8 +470,13 @@ def _format_alert_field(details: list, field: str, value) -> None:
 def _get_customer_info(tenant_id: str, default_status: str, default_orgid: int) -> dict:
     """Get customer information from tenant ID."""
     workspaces_df = api.list_workspaces()
-    customer_records = workspaces_df[workspaces_df["customerId"] == tenant_id].to_dict("records")
-    customer = customer_records[0] if customer_records else {}
+    customer = {}
+
+    filtered_df = workspaces_df[workspaces_df["customerId"] == tenant_id]
+
+    if not filtered_df.empty:
+        customer_records = filtered_df.to_dict("records")
+        customer = customer_records[0]
 
     return {
         "secops_status": customer.get("SecOps Status", default_status),
