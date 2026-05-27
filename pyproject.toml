@@ -94,4 +94,9 @@ markers = [
     "integration: marks tests as integration tests requiring Azure configuration"
 ]
 
+[dependency-groups]
+dev = [
+    "pdoc>=16.0.0",
+]
+
 

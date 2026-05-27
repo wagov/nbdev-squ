@@ -40,7 +40,6 @@ from azure.monitor.query import LogsBatchQuery, LogsQueryClient, LogsQueryStatus
 from benedict import benedict
 from dbt.adapters.duckdb.plugins import BasePlugin, SourceConfig
 from diskcache import memoize_stampede
-from tenable.io import TenableIO
 
 from .core import azcli, cache, chunks, datalake_path, dirs, httpx, load_config, login, retryer
 from .frame import Fmt, as_pandas, format_output, memtable, read_parquet
@@ -120,6 +119,8 @@ class Clients:
         """
         Returns a TenableIO client
         """
+        from tenable.io import TenableIO
+
         return TenableIO(self.config.tenable_access_key, self.config.tenable_secret_key)
 
 

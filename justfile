@@ -15,7 +15,7 @@ test type="fast":
     case "{{type}}" in
         fast) uv run pytest -m "not slow and not integration" ;;
         integration) uv run pytest -m integration -v -s --tb=short ;;
-        cov) uv run pytest --cov=src/nbdev_squ --cov-report=term-missing --cov-report=html ;;
+        cov) uv run pytest --cov=src/wagov_squ --cov-report=term-missing --cov-report=html ;;
         *) uv run pytest -s --tb=short ;;
     esac
 

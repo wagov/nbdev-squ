@@ -1,0 +1,49 @@
+[tools]
+node = "lts"
+python = "3.12"
+uv = "latest"
+
+[tasks.sync]
+description = "Install Python dependencies for development and docs"
+run = "uv sync --extra dev --group dev"
+
+[tasks.npm-ci]
+description = "Install locked JavaScript dependencies"
+run = "npm ci"
+
+[tasks.lint]
+description = "Check Python formatting and lint"
+depends = ["sync"]
+run = [
+  "uv run ruff check src/ tests/",
+  "uv run ruff format --check src/ tests/",
+]
+
+[tasks.typecheck]
+description = "Run static type checks"
+depends = ["sync"]
+run = "uv run mypy src/"
+
+[tasks.test]
+description = "Run fast unit tests"
+depends = ["sync", "js-build"]
+run = "uv run pytest -m 'not slow and not integration'"
+
+[tasks.js-build]
+description = "Build bundled JavaScript helper"
+depends = ["npm-ci"]
+run = "npm run build"
+
+[tasks.build]
+description = "Build JavaScript helper and Python package"
+depends = ["sync", "js-build"]
+run = "uv build"
+
+[tasks.docs]
+description = "Build API documentation with pdoc"
+depends = ["sync"]
+run = "uv run pdoc --output-directory site wagov_squ"
+
+[tasks.ci]
+description = "Run all pull-request checks"
+depends = ["lint", "test"]

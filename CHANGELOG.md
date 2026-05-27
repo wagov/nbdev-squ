@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.4] - 2026-05-27
+
+### Security
+- Updated JavaScript dependencies and lockfile to address open lodash and markdown-it Dependabot alerts.
+- Pinned GitHub Actions by commit SHA and restricted default workflow token permissions.
+- Added a locked npm override for uuid while waiting for Atlaskit transitive dependencies to move to a non-vulnerable range.
+
+### Changed
+- Added mise-managed CI, release, and documentation tasks.
+- Added GitHub Pages workflow that builds pdoc API documentation and deploys via GitHub Actions.
+
 ## [1.4.0] - 2025-09-16
 
 ### Added
