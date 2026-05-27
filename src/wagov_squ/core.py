@@ -16,6 +16,7 @@ __all__ = [
 
 import logging
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -42,8 +43,16 @@ cache = Cache(dirs.user_cache_dir)
 retryer = Retrying(wait=wait_random_exponential(), stop=stop_after_attempt(3), reraise=True)
 
 
+def _az_cmd() -> list[str]:
+    """Return the preferred Azure CLI command."""
+    az = shutil.which("az")
+    if az:
+        return [az]
+    return [sys.executable, "-m", "azure.cli"]
+
+
 def _cli(cmd: list[str], capture_output=True):
-    cmd = [sys.executable, "-m", "azure.cli"] + cmd
+    cmd = _az_cmd() + cmd
     if capture_output:  # Try lots, parse output as json
         try:
             result = retryer(
@@ -96,15 +105,11 @@ def load_config(
         except subprocess.CalledProcessError:
             # Reset corrupted config - try CLI first, fallback to file removal
             try:
-                subprocess.run(
-                    [sys.executable, "-m", "azure.cli", "config", "delete", "--all"], check=True
-                )
+                subprocess.run(_az_cmd() + ["config", "delete", "--all"], check=True)
             except subprocess.CalledProcessError:
                 # If CLI can't start due to corruption, remove config files directly
                 azure_config = Path.home() / ".azure"
                 if azure_config.exists():
-                    import shutil
-
                     shutil.rmtree(azure_config)
             _cli(["config", "set", "extension.use_dynamic_install=yes_without_prompt"])
             _cli(["config", "set", "extension.dynamic_install_allow_preview=true"])
@@ -158,9 +163,7 @@ def login(
                 [
                     "timeout",
                     "5",
-                    sys.executable,
-                    "-m",
-                    "azure.cli",
+                    *_az_cmd(),
                     "login",
                     "--identity",
                     "-o",

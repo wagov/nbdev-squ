@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import ibis
 import pandas as pd
 
 
-class Fmt(str, Enum):
+class Fmt(StrEnum):
     """Output format options."""
 
     pandas = "df"  # legacy default

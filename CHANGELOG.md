@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.5] - 2026-05-27
+
+### Security
+- Removed the bundled `azure-cli` Python dependency and prefer the external `az` executable, reducing vulnerable transitive dependencies in `uv.lock`.
+- Raised Python dependency floors for patched versions flagged by Dependabot after the dependency graph refresh.
+
+### Changed
+- Azure CLI calls now use `az` when available, with the previous `python -m azure.cli` path kept as a fallback for compatible environments.
+
 ## [1.5.4] - 2026-05-27
 
 ### Security
