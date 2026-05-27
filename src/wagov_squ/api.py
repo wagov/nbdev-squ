@@ -430,6 +430,7 @@ def atlaskit_transformer(inputtext, inputfmt="md", outputfmt="wiki", runtime="no
     # Cache the bundle using the current package version
     transformer = dirs.user_cache_path / f"atlaskit-transformer.bundle_v{version('wagov_squ')}.js"
     if not transformer.exists():
+        transformer.parent.mkdir(parents=True, exist_ok=True)
         transformer.write_bytes(bundle_data)
 
     cmd = [runtime, str(transformer), inputfmt, outputfmt]

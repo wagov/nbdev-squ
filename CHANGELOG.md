@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.5.7] - 2026-05-27
+
+### Fixed
+- Ensure the Atlaskit transformer cache directory exists before writing the generated bundle in fresh CI/user environments.
+
 ## [1.5.6] - 2026-05-27
 
 ### Security
