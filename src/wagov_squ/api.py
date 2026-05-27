@@ -39,9 +39,19 @@ from azure.identity import AzureCliCredential
 from azure.monitor.query import LogsBatchQuery, LogsQueryClient, LogsQueryStatus
 from benedict import benedict
 from dbt.adapters.duckdb.plugins import BasePlugin, SourceConfig
-from diskcache import memoize_stampede
 
-from .core import azcli, cache, chunks, datalake_path, dirs, httpx, load_config, login, retryer
+from .core import (
+    azcli,
+    cache,
+    chunks,
+    datalake_path,
+    dirs,
+    httpx,
+    load_config,
+    login,
+    memoize_stampede,
+    retryer,
+)
 from .frame import Fmt, as_pandas, format_output, memtable, read_parquet
 
 logger = logging.getLogger(__name__)

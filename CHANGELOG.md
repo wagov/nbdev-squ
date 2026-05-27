@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.6] - 2026-05-27
+
+### Security
+- Removed the no-patch `diskcache` dependency and unused `pysigma` dependency to clear unsafe pickle deserialization exposure.
+- Replaced disk-backed cache usage with a small process-local cache and non-pickling memoizer.
+
 ## [1.5.5] - 2026-05-27
 
 ### Security

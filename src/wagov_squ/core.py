@@ -19,12 +19,16 @@ import os
 import shutil
 import subprocess
 import sys
+import time
+from collections.abc import Callable
+from functools import wraps
 from pathlib import Path
+from threading import RLock
+from typing import Any
 
 import httpx
 import pandas
 from benedict import benedict
-from diskcache import Cache, memoize_stampede
 from platformdirs import PlatformDirs
 from tenacity import Retrying, stop_after_attempt, wait_random_exponential
 from upath import UPath
@@ -39,8 +43,75 @@ def chunks(items, size):
 
 
 dirs = PlatformDirs("nbdev-squ")
-cache = Cache(dirs.user_cache_dir)
 retryer = Retrying(wait=wait_random_exponential(), stop=stop_after_attempt(3), reraise=True)
+
+
+class MemoryCache:
+    """Small process-local cache with optional TTL, avoiding pickle-backed storage."""
+
+    def __init__(self) -> None:
+        self._items: dict[str, tuple[float | None, Any]] = {}
+        self._lock = RLock()
+
+    def set(self, key: str, value: Any, expire: float | None = None) -> None:
+        expires_at = None if expire is None else time.monotonic() + expire
+        with self._lock:
+            self._items[key] = (expires_at, value)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        with self._lock:
+            item = self._items.get(key)
+            if item is None:
+                return default
+            expires_at, value = item
+            if expires_at is not None and expires_at <= time.monotonic():
+                self._items.pop(key, None)
+                return default
+            return value
+
+    def delete(self, key: str) -> None:
+        with self._lock:
+            self._items.pop(key, None)
+
+    def __getitem__(self, key: str) -> Any:
+        if key not in self:
+            raise KeyError(key)
+        return self.get(key)
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.set(key, value)
+
+    def __contains__(self, key: str) -> bool:
+        with self._lock:
+            item = self._items.get(key)
+            if item is None:
+                return False
+            expires_at, _ = item
+            if expires_at is not None and expires_at <= time.monotonic():
+                self._items.pop(key, None)
+                return False
+            return True
+
+
+cache = MemoryCache()
+
+
+def memoize_stampede(cache_obj: MemoryCache, expire: float) -> Callable:
+    """Minimal memoization decorator compatible with the previous diskcache call sites."""
+
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            key = f"memo:{func.__module__}.{func.__qualname__}:{args!r}:{sorted(kwargs.items())!r}"
+            if key in cache_obj:
+                return cache_obj[key]
+            value = func(*args, **kwargs)
+            cache_obj.set(key, value, expire)
+            return value
+
+        return wrapper
+
+    return decorator
 
 
 def _az_cmd() -> list[str]:
