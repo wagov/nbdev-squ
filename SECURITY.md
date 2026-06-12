@@ -1,19 +1,9 @@
 # Security Policy
 
-## Supported Versions
+## Reporting A Vulnerability
 
-The below versions are currently being supported with security updates.
+If you believe you have found a security vulnerability in this project, do not report it in a public GitHub issue or discussion.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.5.7   | :white_check_mark: |
-| < 1.5.7 | :x:                |
+Please follow the Government of Western Australia Vulnerability Disclosure Policy:
 
-## Reporting a Vulnerability
-
-To report a vulnerability, please submit reports via [github security advisories](https://github.com/wagov/nbdev-squ/security/advisories/new) or email <VulnerabilityDisclosure@dpc.wa.gov.au>
-
-To expedite the triaging and prioritisation of submission, your reports should:
-
-- Describe where the vulnerability was discovered and the potential impact of exploitation.
-- Include enough detail so we can reproduce your steps. Screenshots and proof of concept code are helpful.
+https://www.wa.gov.au/government/publications/vulnerability-disclosure-policy
