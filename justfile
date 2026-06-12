@@ -5,8 +5,8 @@ default:
 # Install project in development mode
 install:
     uv sync --extra dev
-    npm install
-    npm run build
+    pnpm install
+    pnpm run build
     @echo "Development environment ready!"
 
 # Run tests (fast, integration, or with coverage)
@@ -34,7 +34,7 @@ check: lint typecheck
 
 # Build package
 build: 
-    npm run build  # Build JS bundle first
+    pnpm run build  # Build JS bundle first
     uv build
 
 # Create release from current version (use 'just bump patch' first)  
