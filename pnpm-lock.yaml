@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@atlaskit/editor-json-transformer':
-        specifier: 8.33.1
-        version: 8.33.1(react@18.3.1)
+        specifier: 8.33.2
+        version: 8.33.2(react@18.3.1)
       '@atlaskit/editor-markdown-transformer':
         specifier: 5.21.1
         version: 5.21.1(react@18.3.1)
@@ -27,17 +27,22 @@ packages:
   '@atlaskit/adf-schema-generator@2.4.0':
     resolution: {integrity: sha512-67OANQ8dqp2tJbrHjP9vcwf3aQ90t8pyzT66YSc0Fw/52qibUEQtXU5QEQZFtq7Y0go0YreeLdO8dkH6R+zMAA==}
 
-  '@atlaskit/adf-schema@52.16.6':
-    resolution: {integrity: sha512-X7IBM999SaFCA8367JMUWfevOQOHaA8kLuXJFO1hjAvbqKvqQff7qkZVRux8hIFqxbcSowO/6z/NHrtPF7mceg==}
-
   '@atlaskit/adf-schema@53.0.0':
     resolution: {integrity: sha512-uSb4jWVN6nETQ72HP1M07KDGDVZ5iUvT2JYRmUvaGkuf2O1wZrbXOHAjHBrMzT2HLNZ3zmzwHdJENHpU+hjYXA==}
 
-  '@atlaskit/adf-utils@19.33.0':
-    resolution: {integrity: sha512-1EXQUDueAUy1JgIqzX8Y7FI+8tbPI5KcsSfv0flP6rkkOwD0M/tPGdVaIY7gixJ5sRXYMUuuzeFqYhYsmQ95ng==}
+  '@atlaskit/adf-schema@54.0.2':
+    resolution: {integrity: sha512-mq4Sc/Vh0XF1cFmm+qQ4OOeM0i2nqJutclxrJAz3TJayjDmJU9H5kpFOsefrgI1quFk5akZztKdbsL9/1RoW4A==}
+
+  '@atlaskit/adf-utils@19.33.7':
+    resolution: {integrity: sha512-SlBmhVOQsugNXFlexMhxyhazxzXeULGT8Lb9EOEbEj5pDsh/rTwVIcaJkTJ9Oj4iz7DSh74HFKh+GHni0/jx5A==}
 
   '@atlaskit/atlassian-context@0.10.0':
     resolution: {integrity: sha512-4/cWFp+mxIYqPmcn3NSHf/JNL/8bRx0/+lpFTsc1C5nfjyyeuFG18pDQBtNn6kMDjGLAt06TSXEgwZV+P4zmGg==}
+    peerDependencies:
+      react: ^18.2.0 || ^19.0.0
+
+  '@atlaskit/atlassian-context@0.11.0':
+    resolution: {integrity: sha512-Q2iMFa6A3OPruD9GQS+quqHWM5Rh+Ew1bP4MxL2BoJV5QulT66K77fq8c86+g+MRqxeqtZ6jnT5zNw6IVrnpMw==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
@@ -46,11 +51,8 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  '@atlaskit/editor-json-transformer@8.33.0':
-    resolution: {integrity: sha512-ce0hbcGcXIr4M1FCMVkM4RGxdxScroICN4t+dEDbdI4ihVLqMti4+v41cugxbceh1dpd6CJ/z6pGmpzO74nRww==}
-
-  '@atlaskit/editor-json-transformer@8.33.1':
-    resolution: {integrity: sha512-yfYap9LvORqdOy6nxtB3+JqekQ1Suec7ZS1PE32gtLhwkl8PjT+pJqTiwgF1gUdxXBxSVdjoRri2oQKDvh/IiQ==}
+  '@atlaskit/editor-json-transformer@8.33.2':
+    resolution: {integrity: sha512-L9YrGMJUs4cY097o3gHhbR+k9yFE1Eq4LeW1x9cyutV0lg+5HrfZaiFcV6Q8GkyaiDHZej3WiNP9FcLVevWOaw==}
 
   '@atlaskit/editor-markdown-transformer@5.21.1':
     resolution: {integrity: sha512-Gu7jmtX9iMsKEvrkzEH3FclGkXZJ7BheAhcqVZO18NFW+vZmB4EpQX1VrwKaOhzWxrolVDXMtvrstWLkGQN4AQ==}
@@ -64,6 +66,9 @@ packages:
   '@atlaskit/feature-gate-js-client@5.7.2':
     resolution: {integrity: sha512-82ItxZN7aVftw2AVV/JY8wU7Z4Zmmv4rquSEWNTzsjh3/5vjPi2Rfo6iCzRqJjpg/8eNQWOZ5Pq3oL9IPfz2vA==}
 
+  '@atlaskit/feature-gate-js-client@5.8.0':
+    resolution: {integrity: sha512-SJ+U0EVPdAXHy8Ge7I1BT7bptUiCG11x2XVwqRqZ5ysbR9WsfuUfX4l5BchAqyogJrcrt0v8TC1IBmcQ0WeEUA==}
+
   '@atlaskit/interaction-context@3.1.0':
     resolution: {integrity: sha512-LB3T0ATpJ5y7/IVBndNbcjtaNmPcz/8k7+smMibzphmV7xB3HaIyJFEu2JoSmgps66qLXo0ia8Hj7v4dF9zJZw==}
     peerDependencies:
@@ -74,6 +79,16 @@ packages:
 
   '@atlaskit/react-ufo@6.7.3':
     resolution: {integrity: sha512-yJVfCGtmQWsC2/yu0TgAN5FPXpincZG8rkeBz5mBS96KrJOfrjZywSkVsfdI8QdtjJ3BHaXG4Mfcx1cp2RMbVw==}
+    peerDependencies:
+      react: ^18.2.0
+
+  '@atlaskit/react-ufo@6.7.5':
+    resolution: {integrity: sha512-xzz8KzMSAGEni6sUckaer2GNokMeSq9Cn+4awpZhspgiXDv1TOLFqFuqz8uUisHmbUPbK+9e/fE0r6gc5/ZQvg==}
+    peerDependencies:
+      react: ^18.2.0
+
+  '@atlaskit/tmp-editor-statsig@101.0.0':
+    resolution: {integrity: sha512-nC8mkS8+3AyVks1VD1V0tKP1ktHVbC/ThdnnV9bKUSo4FJzLw4dkmDDoRzgW2llLjs68rQBnGAiaLLmWxhwveQ==}
     peerDependencies:
       react: ^18.2.0
 
@@ -400,18 +415,6 @@ snapshots:
       '@babel/runtime': 7.29.7
       lodash: 4.18.1
 
-  '@atlaskit/adf-schema@52.16.6(react@18.3.1)':
-    dependencies:
-      '@atlaskit/adf-schema-generator': 2.4.0
-      '@atlaskit/editor-prosemirror': 7.3.0
-      '@atlaskit/tmp-editor-statsig': 94.0.0(react@18.3.1)
-      '@babel/runtime': 7.29.7
-      css-color-names: 0.0.4
-      linkify-it: 3.0.3
-      memoize-one: 6.0.0
-    transitivePeerDependencies:
-      - react
-
   '@atlaskit/adf-schema@53.0.0(react@18.3.1)':
     dependencies:
       '@atlaskit/adf-schema-generator': 2.4.0
@@ -424,11 +427,23 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  '@atlaskit/adf-utils@19.33.0(react@18.3.1)':
+  '@atlaskit/adf-schema@54.0.2(react@18.3.1)':
     dependencies:
-      '@atlaskit/adf-schema': 53.0.0(react@18.3.1)
+      '@atlaskit/adf-schema-generator': 2.4.0
+      '@atlaskit/editor-prosemirror': 7.3.0
+      '@atlaskit/tmp-editor-statsig': 101.0.0(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      css-color-names: 0.0.4
+      linkify-it: 3.0.3
+      memoize-one: 6.0.0
+    transitivePeerDependencies:
+      - react
+
+  '@atlaskit/adf-utils@19.33.7(react@18.3.1)':
+    dependencies:
+      '@atlaskit/adf-schema': 54.0.2(react@18.3.1)
       '@atlaskit/platform-feature-flags': 1.1.3(react@18.3.1)
-      '@atlaskit/tmp-editor-statsig': 94.0.0(react@18.3.1)
+      '@atlaskit/tmp-editor-statsig': 101.0.0(react@18.3.1)
       '@babel/runtime': 7.29.7
     transitivePeerDependencies:
       - react
@@ -438,25 +453,20 @@ snapshots:
       '@babel/runtime': 7.29.7
       react: 18.3.1
 
+  '@atlaskit/atlassian-context@0.11.0(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      react: 18.3.1
+
   '@atlaskit/browser-apis@0.0.2(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.29.7
       react: 18.3.1
 
-  '@atlaskit/editor-json-transformer@8.33.0(react@18.3.1)':
+  '@atlaskit/editor-json-transformer@8.33.2(react@18.3.1)':
     dependencies:
-      '@atlaskit/adf-schema': 52.16.6(react@18.3.1)
-      '@atlaskit/adf-utils': 19.33.0(react@18.3.1)
-      '@atlaskit/editor-prosemirror': 7.3.0
-      '@babel/runtime': 7.29.7
-      lodash: 4.18.1
-    transitivePeerDependencies:
-      - react
-
-  '@atlaskit/editor-json-transformer@8.33.1(react@18.3.1)':
-    dependencies:
-      '@atlaskit/adf-schema': 53.0.0(react@18.3.1)
-      '@atlaskit/adf-utils': 19.33.0(react@18.3.1)
+      '@atlaskit/adf-schema': 54.0.2(react@18.3.1)
+      '@atlaskit/adf-utils': 19.33.7(react@18.3.1)
       '@atlaskit/editor-prosemirror': 7.3.0
       '@babel/runtime': 7.29.7
       lodash: 4.18.1
@@ -490,7 +500,7 @@ snapshots:
   '@atlaskit/editor-wikimarkup-transformer@11.20.15(react@18.3.1)':
     dependencies:
       '@atlaskit/adf-schema': 53.0.0(react@18.3.1)
-      '@atlaskit/editor-json-transformer': 8.33.0(react@18.3.1)
+      '@atlaskit/editor-json-transformer': 8.33.2(react@18.3.1)
       '@atlaskit/editor-prosemirror': 7.3.0
       '@babel/runtime': 7.29.7
     transitivePeerDependencies:
@@ -499,6 +509,16 @@ snapshots:
   '@atlaskit/feature-gate-js-client@5.7.2(react@18.3.1)':
     dependencies:
       '@atlaskit/atlassian-context': 0.10.0(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      '@statsig/client-core': 3.33.2
+      '@statsig/js-client': 3.33.2
+      eventemitter3: 4.0.7
+    transitivePeerDependencies:
+      - react
+
+  '@atlaskit/feature-gate-js-client@5.8.0(react@18.3.1)':
+    dependencies:
+      '@atlaskit/atlassian-context': 0.11.0(react@18.3.1)
       '@babel/runtime': 7.29.7
       '@statsig/client-core': 3.33.2
       '@statsig/js-client': 3.33.2
@@ -532,6 +552,29 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
       uuid: 3.4.0
+
+  '@atlaskit/react-ufo@6.7.5(react@18.3.1)':
+    dependencies:
+      '@atlaskit/atlassian-context': 0.11.0(react@18.3.1)
+      '@atlaskit/browser-apis': 0.0.2(react@18.3.1)
+      '@atlaskit/feature-gate-js-client': 5.8.0(react@18.3.1)
+      '@atlaskit/interaction-context': 3.1.0(react@18.3.1)
+      '@atlaskit/platform-feature-flags': 1.1.3(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      '@opentelemetry/api': 1.9.1
+      bind-event-listener: 3.0.0
+      bowser-ultralight: 1.0.6
+      react: 18.3.1
+      scheduler: 0.23.2
+      uuid: 3.4.0
+
+  '@atlaskit/tmp-editor-statsig@101.0.0(react@18.3.1)':
+    dependencies:
+      '@atlaskit/feature-gate-js-client': 5.8.0(react@18.3.1)
+      '@atlaskit/platform-feature-flags': 1.1.3(react@18.3.1)
+      '@atlaskit/react-ufo': 6.7.5(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      react: 18.3.1
 
   '@atlaskit/tmp-editor-statsig@94.0.0(react@18.3.1)':
     dependencies:
