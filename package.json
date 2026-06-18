@@ -1,7 +1,7 @@
 {
   "packageManager": "pnpm@11.6.0",
   "dependencies": {
-    "@atlaskit/editor-json-transformer": "8.33.1",
+    "@atlaskit/editor-json-transformer": "9.0.1",
     "@atlaskit/editor-markdown-transformer": "5.21.1",
     "@atlaskit/editor-wikimarkup-transformer": "11.20.15"
   },
