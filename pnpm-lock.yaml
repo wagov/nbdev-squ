@@ -15,8 +15,8 @@ importers:
         specifier: 5.21.1
         version: 5.21.1(react@18.3.1)
       '@atlaskit/editor-wikimarkup-transformer':
-        specifier: 11.20.15
-        version: 11.20.15(react@18.3.1)
+        specifier: 12.1.0
+        version: 12.1.0(react@18.3.1)
     devDependencies:
       esbuild:
         specifier: 0.28.1
@@ -27,17 +27,28 @@ packages:
   '@atlaskit/adf-schema-generator@2.4.0':
     resolution: {integrity: sha512-67OANQ8dqp2tJbrHjP9vcwf3aQ90t8pyzT66YSc0Fw/52qibUEQtXU5QEQZFtq7Y0go0YreeLdO8dkH6R+zMAA==}
 
-  '@atlaskit/adf-schema@52.16.6':
-    resolution: {integrity: sha512-X7IBM999SaFCA8367JMUWfevOQOHaA8kLuXJFO1hjAvbqKvqQff7qkZVRux8hIFqxbcSowO/6z/NHrtPF7mceg==}
+  '@atlaskit/adf-schema-generator@3.1.0':
+    resolution: {integrity: sha512-IFZmT5QZtTmmob54F5CVgZu8gkhapvJkcODDqBFH+exkrunjF11SNzmw4OxSeiPBWHC0lapQaCWMLUUomNHb3Q==}
 
   '@atlaskit/adf-schema@53.0.0':
     resolution: {integrity: sha512-uSb4jWVN6nETQ72HP1M07KDGDVZ5iUvT2JYRmUvaGkuf2O1wZrbXOHAjHBrMzT2HLNZ3zmzwHdJENHpU+hjYXA==}
 
+  '@atlaskit/adf-schema@56.3.0':
+    resolution: {integrity: sha512-nNiaExUoxWb4oFS9XVLeX8/eleVo0pUG5DUP4wR+H+zt+u9pqGE7YA1RNFcahuCtO2l3qizp3FcbhprGo20RDA==}
+
   '@atlaskit/adf-utils@19.33.0':
     resolution: {integrity: sha512-1EXQUDueAUy1JgIqzX8Y7FI+8tbPI5KcsSfv0flP6rkkOwD0M/tPGdVaIY7gixJ5sRXYMUuuzeFqYhYsmQ95ng==}
 
+  '@atlaskit/adf-utils@20.4.0':
+    resolution: {integrity: sha512-YeKI8E7IjlxdW2h1OeLkHqhI3IOHLG+v1ZxVZFPdUVOIdkIGHJRt6GH3WrE3vMu3Nx2DG35JvP/+BBRIZCGR7w==}
+
   '@atlaskit/atlassian-context@0.10.0':
     resolution: {integrity: sha512-4/cWFp+mxIYqPmcn3NSHf/JNL/8bRx0/+lpFTsc1C5nfjyyeuFG18pDQBtNn6kMDjGLAt06TSXEgwZV+P4zmGg==}
+    peerDependencies:
+      react: ^18.2.0 || ^19.0.0
+
+  '@atlaskit/atlassian-context@1.1.1':
+    resolution: {integrity: sha512-Leyd9WQevi1ia+z16yJtVRr0VIU5Zg/ODYObxQm4FtsCXBZ55B4xtGNDFzPsdiaBFRVFVvxbeNloKmbbSKuNAA==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
 
@@ -46,11 +57,16 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  '@atlaskit/editor-json-transformer@8.33.0':
-    resolution: {integrity: sha512-ce0hbcGcXIr4M1FCMVkM4RGxdxScroICN4t+dEDbdI4ihVLqMti4+v41cugxbceh1dpd6CJ/z6pGmpzO74nRww==}
+  '@atlaskit/browser-apis@1.2.0':
+    resolution: {integrity: sha512-SNwf6LGu1BjECz62iC/kIOwmtiJlz4cuf04OnVLlN8amEly+6NHIzZG+IU2Bbpa2vG7oVSj3nSy0gMm/7kqiuQ==}
+    peerDependencies:
+      react: ^18.2.0
 
   '@atlaskit/editor-json-transformer@8.33.1':
     resolution: {integrity: sha512-yfYap9LvORqdOy6nxtB3+JqekQ1Suec7ZS1PE32gtLhwkl8PjT+pJqTiwgF1gUdxXBxSVdjoRri2oQKDvh/IiQ==}
+
+  '@atlaskit/editor-json-transformer@9.2.0':
+    resolution: {integrity: sha512-3Xwoypr4xPXB/Oirw0F6D7sZooFGdo9YxRagYeBOX4toWnx+kZ5fV2fe8FQbLI/B6EENkomOdbu2zYx/zVrO2A==}
 
   '@atlaskit/editor-markdown-transformer@5.21.1':
     resolution: {integrity: sha512-Gu7jmtX9iMsKEvrkzEH3FclGkXZJ7BheAhcqVZO18NFW+vZmB4EpQX1VrwKaOhzWxrolVDXMtvrstWLkGQN4AQ==}
@@ -58,24 +74,51 @@ packages:
   '@atlaskit/editor-prosemirror@7.3.0':
     resolution: {integrity: sha512-6KB4CuURZ+fU1DJMlmCox6q8T5ooVaCE+eZVrAlcODIfTyLu/wCvJfPJLOJUPZBvzCHqoWCebFmpu39uwUUleg==}
 
-  '@atlaskit/editor-wikimarkup-transformer@11.20.15':
-    resolution: {integrity: sha512-CwUsOmItmGm6gmdgEsIpWnoG/2Rjeufem8M5NFexpOMvYGOBf0uM9Uc4aqKvv47nHkkCSJdEpBP6Ke0xZf6SEA==}
+  '@atlaskit/editor-prosemirror@8.0.0':
+    resolution: {integrity: sha512-0wuzCghfLIoN11gKzNEpLtNdNZNGQtv6UenRoy4RCm7/aKfkTnA9tds6r73NqXbbjF7VvASYHk2tgOTq2oECKw==}
+
+  '@atlaskit/editor-wikimarkup-transformer@12.1.0':
+    resolution: {integrity: sha512-3KAuE125b5n0+zdUh8gXT82Xtwospeisryh1u9gqNOhorA7R2bdwsm3enUAjf3kDTKlRB6KYItRv3FGoW4csnw==}
 
   '@atlaskit/feature-gate-js-client@5.7.2':
     resolution: {integrity: sha512-82ItxZN7aVftw2AVV/JY8wU7Z4Zmmv4rquSEWNTzsjh3/5vjPi2Rfo6iCzRqJjpg/8eNQWOZ5Pq3oL9IPfz2vA==}
+
+  '@atlaskit/feature-gate-js-client@6.0.1':
+    resolution: {integrity: sha512-TUNwkF/bGysmq7djiyQJSIb6sgyBbUetSlbd3mx34kqhxgE2kBr0V92A1pT5GDIwgwPfBzuG03BxD+nkIzsuRw==}
 
   '@atlaskit/interaction-context@3.1.0':
     resolution: {integrity: sha512-LB3T0ATpJ5y7/IVBndNbcjtaNmPcz/8k7+smMibzphmV7xB3HaIyJFEu2JoSmgps66qLXo0ia8Hj7v4dF9zJZw==}
     peerDependencies:
       react: ^18.2.0
 
+  '@atlaskit/interaction-context@4.0.0':
+    resolution: {integrity: sha512-cLSmvcMexawbnN4bNE0uOjVSgEYRzPyY4jJ978DI1/Ny4Zx1NgPSXqbLsvClFRs3KLwDdg8wMhprotX2nfTbog==}
+    peerDependencies:
+      react: ^18.2.0
+
   '@atlaskit/platform-feature-flags@1.1.3':
     resolution: {integrity: sha512-dRn6UvVmMF5+WXnv7ZlxKTV2rVQncI2TgM0KTGSqpHdD9LnogITWC/rFjzUuF/W8MBCEvpouGilukqhq6rASnw==}
+
+  '@atlaskit/platform-feature-flags@2.1.1':
+    resolution: {integrity: sha512-TvXQ/KNsKJrWnvM1LelNhRV4CmMVSV9MYkyDMg419wxRMWi3FWYJnYmivdrJWozx7yO1ZmZ0lEwVRQi0+EP6XA==}
+
+  '@atlaskit/react-compiler-gating@0.2.3':
+    resolution: {integrity: sha512-hSWZ1DyJChQ9ZmpmrA7VbdRIO2/RtYwBP7KKJbEG8+8KJW2A82A0mTj0TaH9hoB7JKQB+b8/vDLYA6febqT3wA==}
 
   '@atlaskit/react-ufo@6.7.3':
     resolution: {integrity: sha512-yJVfCGtmQWsC2/yu0TgAN5FPXpincZG8rkeBz5mBS96KrJOfrjZywSkVsfdI8QdtjJ3BHaXG4Mfcx1cp2RMbVw==}
     peerDependencies:
       react: ^18.2.0
+
+  '@atlaskit/react-ufo@7.3.26':
+    resolution: {integrity: sha512-7cJiMvVmIxWwUv+2GiLKHh0JSRBf9ENe3/X5pyI5tNLQZS/v/qAftZU8Ze9By8E9lfViBOONu7AdeozF/k+3TQ==}
+    peerDependencies:
+      react: ^18.2.0
+
+  '@atlaskit/tmp-editor-statsig@135.9.0':
+    resolution: {integrity: sha512-kPZOUZsL65u/WQ1V5TdH6fMjkE9xh8dqNMTTNkQUhS+bP0HQrymRxivYN3VzaJuZqwJJ/mxNIseE9NK7t4qLaQ==}
+    peerDependencies:
+      react: ^18.2.0 || ^19.2.0
 
   '@atlaskit/tmp-editor-statsig@94.0.0':
     resolution: {integrity: sha512-ItaZz7IN3jwOUPW5Yy4zG0AeGlz2O6RbWXkM9ASLc45dtq6acSXWDkrww964MH8YPibY0tBCxf6F/4HaydXHVA==}
@@ -246,8 +289,14 @@ packages:
     resolution: {integrity: sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q==}
     engines: {node: '>=8.0.0'}
 
+  '@statsig/client-core@3.30.2':
+    resolution: {integrity: sha512-F3u1+LDml6IFz/tMbSYI0pEOMR13OHM71lLJ3RuoWpK2KpCwfsHpt7kBmUKJxUXZ05CP/jWgmhG/ROj7eqDCPQ==}
+
   '@statsig/client-core@3.33.2':
     resolution: {integrity: sha512-TKZ546NfK2oShe1sHhgn+TaCoAWZ/bs0soK+gAjB/y5UAqWVhCcORAd/8eRUyor8Lz2VfL3V4Ze/zr1CCM2/5g==}
+
+  '@statsig/js-client@3.30.2':
+    resolution: {integrity: sha512-Cjs4uzyAxt1sw44oa6qSNWuZdO11jmgrpOVBC2NajtpA55GBmAfjZ3vQdXizUffUZMRmFiEpGwxi9zmjFEG7Sw==}
 
   '@statsig/js-client@3.33.2':
     resolution: {integrity: sha512-FgAnaN0d8X/OEZS/HEGI2D3CdbZzsbw3BHlSGvaqUcnwu45aXejFFUCCw96/NTH4lEvSMj1S1RBsrnQ2pVErgQ==}
@@ -400,7 +449,13 @@ snapshots:
       '@babel/runtime': 7.29.7
       lodash: 4.18.1
 
-  '@atlaskit/adf-schema@52.16.6(react@18.3.1)':
+  '@atlaskit/adf-schema-generator@3.1.0':
+    dependencies:
+      '@atlaskit/editor-prosemirror': 8.0.0
+      '@babel/runtime': 7.29.7
+      lodash: 4.18.1
+
+  '@atlaskit/adf-schema@53.0.0(react@18.3.1)':
     dependencies:
       '@atlaskit/adf-schema-generator': 2.4.0
       '@atlaskit/editor-prosemirror': 7.3.0
@@ -412,11 +467,12 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  '@atlaskit/adf-schema@53.0.0(react@18.3.1)':
+  '@atlaskit/adf-schema@56.3.0(react@18.3.1)':
     dependencies:
-      '@atlaskit/adf-schema-generator': 2.4.0
-      '@atlaskit/editor-prosemirror': 7.3.0
-      '@atlaskit/tmp-editor-statsig': 94.0.0(react@18.3.1)
+      '@atlaskit/adf-schema-generator': 3.1.0
+      '@atlaskit/editor-prosemirror': 8.0.0
+      '@atlaskit/platform-feature-flags': 2.1.1(react@18.3.1)
+      '@atlaskit/tmp-editor-statsig': 135.9.0(react@18.3.1)
       '@babel/runtime': 7.29.7
       css-color-names: 0.0.4
       linkify-it: 3.0.3
@@ -433,7 +489,21 @@ snapshots:
     transitivePeerDependencies:
       - react
 
+  '@atlaskit/adf-utils@20.4.0(react@18.3.1)':
+    dependencies:
+      '@atlaskit/adf-schema': 56.3.0(react@18.3.1)
+      '@atlaskit/platform-feature-flags': 2.1.1(react@18.3.1)
+      '@atlaskit/tmp-editor-statsig': 135.9.0(react@18.3.1)
+      '@babel/runtime': 7.29.7
+    transitivePeerDependencies:
+      - react
+
   '@atlaskit/atlassian-context@0.10.0(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      react: 18.3.1
+
+  '@atlaskit/atlassian-context@1.1.1(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.29.7
       react: 18.3.1
@@ -443,9 +513,14 @@ snapshots:
       '@babel/runtime': 7.29.7
       react: 18.3.1
 
-  '@atlaskit/editor-json-transformer@8.33.0(react@18.3.1)':
+  '@atlaskit/browser-apis@1.2.0(react@18.3.1)':
     dependencies:
-      '@atlaskit/adf-schema': 52.16.6(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      react: 18.3.1
+
+  '@atlaskit/editor-json-transformer@8.33.1(react@18.3.1)':
+    dependencies:
+      '@atlaskit/adf-schema': 53.0.0(react@18.3.1)
       '@atlaskit/adf-utils': 19.33.0(react@18.3.1)
       '@atlaskit/editor-prosemirror': 7.3.0
       '@babel/runtime': 7.29.7
@@ -453,11 +528,11 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  '@atlaskit/editor-json-transformer@8.33.1(react@18.3.1)':
+  '@atlaskit/editor-json-transformer@9.2.0(react@18.3.1)':
     dependencies:
-      '@atlaskit/adf-schema': 53.0.0(react@18.3.1)
-      '@atlaskit/adf-utils': 19.33.0(react@18.3.1)
-      '@atlaskit/editor-prosemirror': 7.3.0
+      '@atlaskit/adf-schema': 56.3.0(react@18.3.1)
+      '@atlaskit/adf-utils': 20.4.0(react@18.3.1)
+      '@atlaskit/editor-prosemirror': 8.0.0
       '@babel/runtime': 7.29.7
       lodash: 4.18.1
     transitivePeerDependencies:
@@ -487,11 +562,25 @@ snapshots:
       prosemirror-utils: 1.2.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)
       prosemirror-view: 1.41.5
 
-  '@atlaskit/editor-wikimarkup-transformer@11.20.15(react@18.3.1)':
+  '@atlaskit/editor-prosemirror@8.0.0':
     dependencies:
-      '@atlaskit/adf-schema': 53.0.0(react@18.3.1)
-      '@atlaskit/editor-json-transformer': 8.33.0(react@18.3.1)
-      '@atlaskit/editor-prosemirror': 7.3.0
+      '@babel/runtime': 7.29.7
+      prosemirror-commands: 1.7.1
+      prosemirror-dropcursor: 1.8.2
+      prosemirror-history: 1.5.0
+      prosemirror-keymap: 1.2.3
+      prosemirror-markdown: 1.13.2
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      prosemirror-transform: 1.10.5
+      prosemirror-utils: 1.2.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)
+      prosemirror-view: 1.41.5
+
+  '@atlaskit/editor-wikimarkup-transformer@12.1.0(react@18.3.1)':
+    dependencies:
+      '@atlaskit/adf-schema': 56.3.0(react@18.3.1)
+      '@atlaskit/editor-json-transformer': 9.2.0(react@18.3.1)
+      '@atlaskit/editor-prosemirror': 8.0.0
       '@babel/runtime': 7.29.7
     transitivePeerDependencies:
       - react
@@ -506,7 +595,22 @@ snapshots:
     transitivePeerDependencies:
       - react
 
+  '@atlaskit/feature-gate-js-client@6.0.1(react@18.3.1)':
+    dependencies:
+      '@atlaskit/atlassian-context': 1.1.1(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      '@statsig/client-core': 3.30.2
+      '@statsig/js-client': 3.30.2
+      eventemitter3: 4.0.7
+    transitivePeerDependencies:
+      - react
+
   '@atlaskit/interaction-context@3.1.0(react@18.3.1)':
+    dependencies:
+      '@babel/runtime': 7.29.7
+      react: 18.3.1
+
+  '@atlaskit/interaction-context@4.0.0(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.29.7
       react: 18.3.1
@@ -514,6 +618,20 @@ snapshots:
   '@atlaskit/platform-feature-flags@1.1.3(react@18.3.1)':
     dependencies:
       '@atlaskit/feature-gate-js-client': 5.7.2(react@18.3.1)
+      '@babel/runtime': 7.29.7
+    transitivePeerDependencies:
+      - react
+
+  '@atlaskit/platform-feature-flags@2.1.1(react@18.3.1)':
+    dependencies:
+      '@atlaskit/feature-gate-js-client': 6.0.1(react@18.3.1)
+      '@babel/runtime': 7.29.7
+    transitivePeerDependencies:
+      - react
+
+  '@atlaskit/react-compiler-gating@0.2.3(react@18.3.1)':
+    dependencies:
+      '@atlaskit/feature-gate-js-client': 6.0.1(react@18.3.1)
       '@babel/runtime': 7.29.7
     transitivePeerDependencies:
       - react
@@ -532,6 +650,30 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
       uuid: 3.4.0
+
+  '@atlaskit/react-ufo@7.3.26(react@18.3.1)':
+    dependencies:
+      '@atlaskit/atlassian-context': 1.1.1(react@18.3.1)
+      '@atlaskit/browser-apis': 1.2.0(react@18.3.1)
+      '@atlaskit/feature-gate-js-client': 6.0.1(react@18.3.1)
+      '@atlaskit/interaction-context': 4.0.0(react@18.3.1)
+      '@atlaskit/platform-feature-flags': 2.1.1(react@18.3.1)
+      '@atlaskit/react-compiler-gating': 0.2.3(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      '@opentelemetry/api': 1.9.1
+      bind-event-listener: 3.0.0
+      bowser-ultralight: 1.0.6
+      react: 18.3.1
+      scheduler: 0.23.2
+      uuid: 3.4.0
+
+  '@atlaskit/tmp-editor-statsig@135.9.0(react@18.3.1)':
+    dependencies:
+      '@atlaskit/feature-gate-js-client': 6.0.1(react@18.3.1)
+      '@atlaskit/platform-feature-flags': 2.1.1(react@18.3.1)
+      '@atlaskit/react-ufo': 7.3.26(react@18.3.1)
+      '@babel/runtime': 7.29.7
+      react: 18.3.1
 
   '@atlaskit/tmp-editor-statsig@94.0.0(react@18.3.1)':
     dependencies:
@@ -623,7 +765,13 @@ snapshots:
 
   '@opentelemetry/api@1.9.1': {}
 
+  '@statsig/client-core@3.30.2': {}
+
   '@statsig/client-core@3.33.2': {}
+
+  '@statsig/js-client@3.30.2':
+    dependencies:
+      '@statsig/client-core': 3.30.2
 
   '@statsig/js-client@3.33.2':
     dependencies:
